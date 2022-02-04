@@ -1,5 +1,5 @@
 """
-Transaction class of this module handles the transactions (cash-in/cash-out) of a portfolio.
+Transactions class of this module handles the transactions (cash-in/cash-out) of a portfolio.
 You are allowed to add / modify / delete transactions in the past or present, but not in the future.
 """
 
@@ -14,8 +14,3 @@ class Transactions():
         transaction = {"date": date, "amount": real_amount, "currency": currency}
         self.transactions_list.append(transaction)
         return transaction
-
-test = Transactions()
-test.add_transaction("2020.01.20.", "Withdraw", 1200, "HUF")
-test.add_transaction("2020.01.20.", "Cash-In", 1200, "HUF")
-print(test.transactions_list)
