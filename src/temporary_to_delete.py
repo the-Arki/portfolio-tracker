@@ -10,31 +10,27 @@ new_tr6 = {"date": "2002-02-28", "amount": -1, "currency": "HUF"}
 
 trs = []
 
-def add_tr(transact):
-    new_transaction = {"date": transact["date"], transact["currency"]: transact["amount"]}
-    new_tr_date = False
-    new_tr_currency = False
-    if not trs:
-        trs.append(new_transaction)
-    else:
-        for transaction in trs:
-            if new_transaction["date"] in transaction["date"]:
-                new_tr_date = True
-                if transact['currency'] in transaction:
-                    new_tr_currency = True
-                    break
-        if new_tr_currency:
-            transaction[transact['currency']] = transaction[transact['currency']] + transact["amount"]
-        elif new_tr_date:
-            transaction[transact['currency']] = transact["amount"]
-        else:
-            trs.append(new_transaction)
-                # else:
-                #     if transact['currency'] not in transaction:
-                #         transaction[transact['currency']] = transact["amount"]
-            # elif new_transaction["date"] not in transaction["date"]:
-            #     trs.append(new_transaction)
-t1_start = perf_counter()
+# def add_tr(transact):
+#     new_transaction = {"date": transact["date"], transact["currency"]: transact["amount"]}
+#     new_tr_date = False
+#     new_tr_currency = False
+#     if not trs:
+#         trs.append(new_transaction)
+#     else:
+#         for transaction in trs:
+#             if new_transaction["date"] in transaction["date"]:
+#                 new_tr_date = True
+#                 if transact['currency'] in transaction:
+#                     new_tr_currency = True
+#                     break
+#         if new_tr_currency:
+#             transaction[transact['currency']] = transaction[transact['currency']] + transact["amount"]
+#         elif new_tr_date:
+#             transaction[transact['currency']] = transact["amount"]
+#         else:
+#             trs.append(new_transaction)
+
+
 # print('0: ', trs)
 # add_tr(new_tr1)
 # print('1: ', trs)
@@ -42,7 +38,7 @@ t1_start = perf_counter()
 # print('2: ', trs)
 # add_tr(new_tr3)
 # print('3: ', trs)
-t1_stop = perf_counter()
+
 # df = pd.DataFrame(index=[new_tr1["date"]])
 # # df = df.set_index(["date"]).sort_index()
 
@@ -116,21 +112,39 @@ def _evaluate_transaction_date(date, dates):
         position = None
     return in_dates, position
 
-t2_start = perf_counter()
-print('0: ', trs)
-add_tr2(new_tr1)
-print('1: ', trs)
-add_tr2(new_tr2)
-print('2: ', trs)
-add_tr2(new_tr3)
-print('3: ', trs)
-add_tr2(new_tr4)
-print('4: ', trs)
-add_tr2(new_tr5)
-print('5: ', trs)
-add_tr2(new_tr6)
-print('6: ', trs)
-t2_stop = perf_counter()
+def feed_add_tr2(transactions):
+    if type(transactions) == dict:
+        add_tr2(transactions)
+    else:
+        for transaction in transactions:
+            add_tr2(transaction)
 
+tr_list = [{"date": "2002-02-22", "amount": 10, "currency": "HUF"},
+{"date": "2002-02-24", "amount": 10, "currency": "USD"},
+{"date": "2002-02-24", "amount": -1, "currency": "HUF"},
+{"date": "2002-02-22", "amount": 10, "currency": "USD"},
+{"date": "2002-02-11", "amount": 10, "currency": "USD"},
+{"date": "2002-02-28", "amount": -1, "currency": "HUF"}]
+t1_start = perf_counter()
+feed_add_tr2(tr_list)
+# print('0: ', trs)
+# add_tr2(new_tr1)
+# # print('1: ', trs)
+# add_tr2(new_tr2)
+# # print('2: ', trs)
+# add_tr2(new_tr3)
+# # print('3: ', trs)
+# add_tr2(new_tr4)
+# # print('4: ', trs)
+# add_tr2(new_tr5)
+# # print('5: ', trs)
+# add_tr2(new_tr6)
+print('6: ', trs)
+t1_stop = perf_counter()
+
+t2_start = perf_counter()
+df = pd.DataFrame(trs).set_index("date")
+print(df)
+t2_stop = perf_counter()
 print("perf1: ", t1_stop - t1_start)
 print("perf2: ", t2_stop - t2_start)

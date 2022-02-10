@@ -7,7 +7,7 @@ class Transactions():
             {"date": "2002-02-22", "amount": 10, "currency": "USD"}]
     
     def define_transaction(self, date, type, amount, currency):
-        if type == "Cash-In":
+        if type == "Cash-In" or type == "dividend":
             real_amount = amount
         if type == "Withdraw":
             real_amount = -amount
@@ -19,3 +19,8 @@ class Transactions():
     
     def remove_transaction(self, transaction):
         self.transactions_list.remove(transaction)
+
+
+x = Transactions().define_transaction('2020', "Withdraw", 20, 'HUF')
+if __name__ == "__main__":
+    print(x)
