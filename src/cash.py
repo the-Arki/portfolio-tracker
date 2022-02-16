@@ -44,8 +44,6 @@ class Cash(Transactions):
         return self.cash_df
 
     def _create_dataframe(self, transaction, first_creation=False):
-        #  currently it works only for new cash_df
-        #  temporary df is still missing
         start_date = transaction["date"]
         if first_creation:
             end_date = datetime.date(datetime.now())
