@@ -45,14 +45,22 @@ class Cash():
     def _validate_transaction(self, transaction):
         # this method should be changed
         if transaction["amount"] >= 0:
-            return
+            return True
         else:
             if (not self.cash_df.empty and
                 transaction["currency"] in self.cash_df.columns and
                 transaction["amount"] + (min(self.cash_df[transaction["currency"]].values)) >= 0):
-                return
+                return True
             else:
                 print("There is not enough cash available for this transaction.")
+                while True:
+                    decision = input("Test it? (Yes or No)")
+                    if decision.lower() == "yes":
+                        return True
+                    elif decision.lower() == "no":
+                        return False
+                    else:
+                        print("TypeError - The answer {} is incorrect.".format(decision))
 
     def add_transaction_to_list(self, transaction):
         self.cash_transactions_list.append(transaction)
@@ -111,8 +119,8 @@ class Cash():
 
 
 # -------------------------------------------------------------
-tr1 = {"date": "2021-01-10", "type": 'Cash-In', "currency": "HUF", "amount": 10}
-tr2 = {"date": "2021-01-01", "type": 'Cash-In', "currency": "EUR", "amount": 10}
+tr1 = {"date": "2021-01-10", "type": 'Withdraw', "currency": "HUF", "amount": 10}
+tr2 = {"date": "2021-01-01", "type": 'Withdraw', "currency": "EUR", "amount": 10}
 tr3 = {"date": "2020-01-01", "type": 'Cash-In', "currency": "USD", "amount": 10}
 tr4 = {"date": "2019-01-01", "type": 'Withdraw', "currency": "HUF", "amount": 1}
 pesto = Cash()
@@ -120,7 +128,10 @@ pesto = Cash()
 
 def test(tr):
     tr_ = pesto.get_transaction(tr)
-    pesto._validate_transaction(tr_)
+    print("transaction details: ", tr)
+    if not pesto._validate_transaction(tr_):
+        print("Transaction aborted.")
+        return
     pesto.add_transaction_to_df(tr_)
     print(pesto.cash_df)
 
@@ -129,3 +140,4 @@ test(tr1)
 test(tr2)
 test(tr3)
 test(tr4)
+print("df at the end: ", pesto.cash_df)
