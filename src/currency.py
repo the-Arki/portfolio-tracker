@@ -21,10 +21,13 @@ class Currency():
     """
     _base_currency = 'USD'
     today = datetime.date(datetime.now())
+    currencies_df = pd.DataFrame
+    start_date = None
 
-    def __init__(self, start_date=None, currencies_df=pd.DataFrame):
-        self.currencies_df = currencies_df
-        self.start_date = start_date
+    @classmethod
+    def test(cls, df):
+        cls.currencies_df = df
+        return cls.currencies_df
 
     def _check_currency(self, currency):
         """Check if currency is in the exchange rates database and
@@ -44,13 +47,17 @@ class Currency():
         df = pd.DataFrame(index=dates)
         return df
 
+    @classmethod
+    def _set_start_date(cls, start):
+        cls.start_date = start
+
     def set_exchange_rates(self, currency, start_date):
         """Set the exchange range for the passed currency.
         If the given start date is earlier than the current self.start_date,
         then update all values with this new start.
         """
         if not self.start_date:
-            self.start_date = start_date
+            self._set_start_date(start_date)
         if self.currencies_df.empty:
             self.currencies_df = self._create_dataframe(self.start_date,
                                                         self.today)
@@ -61,12 +68,16 @@ class Currency():
         if start_date < self.start_date:
             self.currencies_df = self._update_df(start_date, self.start_date,
                                                  self.currencies_df)
+        self.test(self.currencies_df)
         return self.currencies_df
 
     def _add_currency_to_df(self, currency, df, start_date, end_date):
         """Add the currency to the exchange rates database.
         If the first value is NaN, then look for an earlier value to start.
         """
+        if currency == self._base_currency:
+            df[currency] = 1
+            return df
         df[currency] = (web.DataReader(currency + self._base_currency + '=X',
                         data_source='yahoo', start=start_date,
                         end=end_date)['Adj Close'])
@@ -96,18 +107,21 @@ class Currency():
 
     def _update_df(self, start_date, end_date, df_to_extend):
         """ Set exchange rates for the missing dates."""
+        end_date = pd.to_datetime(end_date) - pd.Timedelta(days=1)
         df = self._create_dataframe(start_date, end_date)
         for currency in df_to_extend.columns:
             df = self._add_currency_to_df(currency, df, start_date, end_date)
         extended_df = pd.concat([df, df_to_extend], sort=True)
-        self.start_date = start_date
+        self._set_start_date(start_date)
         return extended_df
 
 
-c = Currency()
-c.set_exchange_rates('HUF', '2022-02-10')
-# print(c.currencies_df)
-# print(c.start_date)
-c.set_exchange_rates('EUR', '2022-02-05')
-print(c.currencies_df)
-# print('start: ', c.start_date)
+# -------------------------------------------------------------
+if __name__ == "__main__":
+    c = Currency()
+    c.set_exchange_rates('HUF', '2022-02-10')
+    # print(c.currencies_df)
+    # print(c.start_date)
+    c.set_exchange_rates('EUR', '2022-02-05')
+    print(c.currencies_df)
+    # print('start: ', c.start_date)

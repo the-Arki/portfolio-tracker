@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime
+from currency import Currency
 
 
 class Cash():
@@ -13,22 +14,33 @@ class Cash():
 
     -get a transaction in dict format
     -validate it (the total amount for that currency cannot be less than 0)
-        -it has to be checked for the whole column!!!
-    -add the transaction to the cash_transactions_list
+     -it has to be checked for the whole column!!!
+        -add the transaction to the cash_transactions_list
     -sort cash_transactions_list by date
     -update the database (cash_df) with the new value
     -add / update "total" column in database in the main currency (currency)
-        -plot the cash history (cash_df["total"] column values)
-
-    -edit transaction in transactions_list if needed
+    -update exchange rates in Currency class --> _update_exchange_rates
+        -edit transaction in transactions_list if needed
     """
 
-    def __init__(self, currency="USD", cash_df=pd.DataFrame):
+    def __init__(self, currency="HUF", cash_df=pd.DataFrame):
         self.cash_df = cash_df
         self.cash_transactions_list = []
         self.currency = currency
 
-    def get_transaction(self, transaction):
+    def handle_transaction(self, transaction):
+        tr = self._get_transaction(transaction)
+        if not tr:
+            return
+        if self._validate_transaction(tr):
+            self.add_transaction_to_list(tr)
+            self._sort_transactions_list()
+            self._add_transaction_to_df(tr)
+            self._update_exchange_rates(tr)
+        else:
+            return
+
+    def _get_transaction(self, transaction):
         type = transaction["type"]
         add_list = ["Cash-In", "Dividend", "Sell"]
         subtract_list = ["Withdraw", "Buy"]
@@ -63,20 +75,23 @@ class Cash():
                         print("TypeError - The answer {} is incorrect.".format(decision))
 
     def add_transaction_to_list(self, transaction):
+        # not done yet
         self.cash_transactions_list.append(transaction)
 
     def remove_transaction(self, transaction):
+        # not done yet
         self.cash_transactions_list.remove(transaction)
 
     def edit_transaction(seld, transaction):
+        # not done yet
         pass
 
-    def sort_transactions_list(self):
+    def _sort_transactions_list(self):
         self.cash_transactions_list = sorted(
             self.cash_transactions_list,
             key=lambda transaction: transaction["date"])
 
-    def add_transaction_to_df(self, transaction):
+    def _add_transaction_to_df(self, transaction):
         tr = transaction
         if self.cash_df.empty:
             self.cash_df = self._create_dataframe(
@@ -109,35 +124,40 @@ class Cash():
             {transaction["currency"]: 0}, index=dates)
         return df
 
+    def _update_exchange_rates(self, transaction):
+        print(transaction["currency"])
+        print(transaction["date"])
+        # print(Currency.test)
+        curr = Currency()
+        curr.set_exchange_rates(transaction["currency"], transaction["date"])
+
     def get_total_value(self, currency_df):
         df = self.cash_df * currency_df[self.cash_df.columns]
         df = df.dropna(how='all')
         df['Total_USD'] = df.sum(axis=1)
         df['Total'] = df['Total_USD'].div(currency_df[self.currency])
-        self.cash_df['Total'] = df['Total'].dropna(axis=1)
+        self.cash_df['Total'] = df['Total']
         return self.cash_df
 
 
 # -------------------------------------------------------------
-tr1 = {"date": "2021-01-10", "type": 'Withdraw', "currency": "HUF", "amount": 10}
-tr2 = {"date": "2021-01-01", "type": 'Withdraw', "currency": "EUR", "amount": 10}
-tr3 = {"date": "2020-01-01", "type": 'Cash-In', "currency": "USD", "amount": 10}
-tr4 = {"date": "2019-01-01", "type": 'Withdraw', "currency": "HUF", "amount": 1}
-pesto = Cash()
+if __name__ == "__main__":
+    tr1 = {"date": "2021-01-10", "type": 'Cash-In', "currency": "HUF", "amount": 10}
+    tr2 = {"date": "2021-01-01", "type": 'Cash-In', "currency": "EUR", "amount": 10}
+    tr3 = {"date": "2020-01-01", "type": 'Cash-In', "currency": "USD", "amount": 10}
+    tr4 = {"date": "2019-01-01", "type": 'Cash-In', "currency": "HUF", "amount": 1}
+    pesto = Cash()
 
+    def test(tr):
+        pesto.handle_transaction(tr)
+        print("transaction details: ", tr)
 
-def test(tr):
-    tr_ = pesto.get_transaction(tr)
-    print("transaction details: ", tr)
-    if not pesto._validate_transaction(tr_):
-        print("Transaction aborted.")
-        return
-    pesto.add_transaction_to_df(tr_)
-    print(pesto.cash_df)
-
-
-test(tr1)
-test(tr2)
-test(tr3)
-test(tr4)
-print("df at the end: ", pesto.cash_df)
+    test(tr1)
+    test(tr2)
+    # test(tr3)
+    # test(tr4)
+    print("df at the end: ", pesto.cash_df)
+    test = Currency()
+    test_df = test.currencies_df
+    x = pesto.get_total_value(test_df)
+    print("yooooooooooooooooooooooooooo", x)
