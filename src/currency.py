@@ -25,9 +25,13 @@ class Currency():
     start_date = None
 
     @classmethod
-    def test(cls, df):
+    def _change_df_in_class(cls, df):
         cls.currencies_df = df
         return cls.currencies_df
+
+    @classmethod
+    def _set_start_date(cls, start):
+        cls.start_date = start
 
     def _check_currency(self, currency):
         """Check if currency is in the exchange rates database and
@@ -47,10 +51,6 @@ class Currency():
         df = pd.DataFrame(index=dates)
         return df
 
-    @classmethod
-    def _set_start_date(cls, start):
-        cls.start_date = start
-
     def set_exchange_rates(self, currency, start_date):
         """Set the exchange range for the passed currency.
         If the given start date is earlier than the current self.start_date,
@@ -69,7 +69,7 @@ class Currency():
             end_date = pd.to_datetime(self.start_date) - pd.Timedelta(days=1)
             self.currencies_df = self.update_df(start_date, end_date,
                                                  self.currencies_df)
-        self.test(self.currencies_df)
+        self._change_df_in_class(self.currencies_df)
         return self.currencies_df
 
     def _add_currency_to_df(self, currency, df, start_date, end_date):

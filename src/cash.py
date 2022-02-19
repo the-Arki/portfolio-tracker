@@ -27,6 +27,7 @@ class Cash():
         self.cash_df = cash_df
         self.cash_transactions_list = []
         self.currency = currency
+        self.exchange_rates = Currency()
 
     def handle_transaction(self, transaction):
         tr = self._get_transaction(transaction)
@@ -125,11 +126,8 @@ class Cash():
         return df
 
     def _update_exchange_rates(self, transaction):
-        print(transaction["currency"])
-        print(transaction["date"])
-        # print(Currency.test)
-        curr = Currency()
-        curr.set_exchange_rates(transaction["currency"], transaction["date"])
+        self.exchange_rates.set_exchange_rates(transaction["currency"],
+                                               transaction["date"])
 
     def get_total_value(self, currency_df):
         df = self.cash_df * currency_df[self.cash_df.columns]
@@ -155,7 +153,6 @@ if __name__ == "__main__":
     test(tr3)
     test(tr4)
     print("df at the end: ", pesto.cash_df)
-    test = Currency()
-    test_df = test.currencies_df
+    test_df = pesto.ex.currencies_df
     x = pesto.get_total_value(test_df)
     print("yooooooooooooooooooooooooooo", x)
