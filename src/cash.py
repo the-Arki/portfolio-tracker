@@ -142,20 +142,18 @@ class Cash():
 
 # -------------------------------------------------------------
 if __name__ == "__main__":
-    tr1 = {"date": "2021-01-10", "type": 'Cash-In', "currency": "HUF", "amount": 10}
-    tr2 = {"date": "2021-01-01", "type": 'Cash-In', "currency": "EUR", "amount": 10}
+    tr1 = {"date": "2021-01-01", "type": 'Cash-In', "currency": "HUF", "amount": 10}
+    tr2 = {"date": "2021-01-01", "type": 'Cash-In', "currency": "HUF", "amount": 10}
     tr3 = {"date": "2020-01-01", "type": 'Cash-In', "currency": "USD", "amount": 10}
     tr4 = {"date": "2019-01-01", "type": 'Cash-In', "currency": "HUF", "amount": 1}
     pesto = Cash()
 
     def test(tr):
         pesto.handle_transaction(tr)
-        print("transaction details: ", tr)
-
     test(tr1)
     test(tr2)
-    # test(tr3)
-    # test(tr4)
+    test(tr3)
+    test(tr4)
     print("df at the end: ", pesto.cash_df)
     test = Currency()
     test_df = test.currencies_df

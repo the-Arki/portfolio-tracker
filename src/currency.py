@@ -17,7 +17,7 @@ class Currency():
         -get exchange rates for currency to _base_currency pairs
             and store them in a DataFrame (currencies_df)
         -if the start_date < previous start_date:
-            -update dataframe with the missing values
+            -update dataframe with the missing values (the last date has to be today)
     """
     _base_currency = 'USD'
     today = datetime.date(datetime.now())
@@ -66,7 +66,8 @@ class Currency():
                 self._add_currency_to_df(currency, self.currencies_df,
                                          self.start_date, self.today))
         if start_date < self.start_date:
-            self.currencies_df = self._update_df(start_date, self.start_date,
+            end_date = pd.to_datetime(self.start_date) - pd.Timedelta(days=1)
+            self.currencies_df = self.update_df(start_date, end_date,
                                                  self.currencies_df)
         self.test(self.currencies_df)
         return self.currencies_df
@@ -105,9 +106,9 @@ class Currency():
             else:
                 return df.iloc[0]
 
-    def _update_df(self, start_date, end_date, df_to_extend):
+    def update_df(self, start_date, end_date, df_to_extend):
         """ Set exchange rates for the missing dates."""
-        end_date = pd.to_datetime(end_date) - pd.Timedelta(days=1)
+        end_date = end_date
         df = self._create_dataframe(start_date, end_date)
         for currency in df_to_extend.columns:
             df = self._add_currency_to_df(currency, df, start_date, end_date)

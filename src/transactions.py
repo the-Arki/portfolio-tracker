@@ -4,10 +4,7 @@ class Transactions():
     but not in the future."""
 
     def __init__(self):
-        self.transactions_list = [
-            {"date": "2002-02-22", "amount": 10, "currency": "HUF"},
-            {"date": "2002-02-24", "amount": -1, "currency": "HUF"},
-            {"date": "2002-02-22", "amount": 10, "currency": "USD"}]
+        self.transactions_list = []
 
     def define_transaction(self, date, type, amount, currency):
         if type in ["Cash-In", "Dividend"]:
@@ -19,9 +16,11 @@ class Transactions():
         return transaction
 
     def add_transaction(self, transaction):
+        # it's not finished yet
         self.transactions_list.append(transaction)
 
     def remove_transaction(self, transaction):
+        # it's not finished yet
         self.transactions_list.remove(transaction)
 
 
