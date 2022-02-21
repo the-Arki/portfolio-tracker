@@ -23,10 +23,10 @@ class Cash():
         -edit transaction in transactions_list if needed
     """
 
-    def __init__(self, currency="HUF", cash_df=pd.DataFrame):
-        self.cash_df = cash_df
+    def __init__(self, currency="HUF", cash_df=pd.DataFrame()):
+        self.historical_df = cash_df
         self.cash_transactions_list = []
-        self.currency = currency
+        self._currency = currency
         self.exchange_rates = Currency()
 
     def handle_transaction(self, transaction):
@@ -60,9 +60,9 @@ class Cash():
         if transaction["amount"] >= 0:
             return True
         else:
-            if (not self.cash_df.empty and
-                transaction["currency"] in self.cash_df.columns and
-                transaction["amount"] + (min(self.cash_df[transaction["currency"]].values)) >= 0):
+            if (not self.historical_df.empty and
+                transaction["currency"] in self.historical_df.columns and
+                transaction["amount"] + (min(self.historical_df[transaction["currency"]].values)) >= 0):
                 return True
             else:
                 print("There is not enough cash available for this transaction.")
@@ -94,32 +94,32 @@ class Cash():
 
     def _add_transaction_to_df(self, transaction):
         tr = transaction
-        if self.cash_df.empty:
-            self.cash_df = self._create_dataframe(
+        if self.historical_df.empty:
+            self.historical_df = self._create_dataframe(
                 tr, first_creation=True)
-            self.cash_df[tr["currency"]] = tr["amount"]
+            self.historical_df[tr["currency"]] = tr["amount"]
         else:
-            if tr["date"] < str(self.cash_df.index[0]):
+            if tr["date"] < str(self.historical_df.index[0]):
                 temp_df = self._create_dataframe(tr)
-                self.cash_df = pd.concat([temp_df, self.cash_df],
-                                         copy=False, sort=True, axis=0)
-                self.cash_df.fillna(0, inplace=True)
-            if tr["currency"] in self.cash_df.keys():
-                self.cash_df.loc[self.cash_df.index >= tr["date"],
-                                 tr['currency']] = self.cash_df[
+                self.historical_df = pd.concat([temp_df, self.historical_df],
+                                               copy=False, sort=True, axis=0)
+                self.historical_df.fillna(0, inplace=True)
+            if tr["currency"] in self.historical_df.keys():
+                self.historical_df.loc[self.historical_df.index >= tr["date"],
+                                       tr['currency']] = self.historical_df[
                             tr["currency"]] + tr['amount']
             else:
-                self.cash_df.loc[self.cash_df.index >= tr["date"],
-                                 tr['currency']] = tr['amount']
-                self.cash_df.fillna(0, inplace=True)
-        return self.cash_df
+                self.historical_df.loc[self.historical_df.index >= tr["date"],
+                                       tr['currency']] = tr['amount']
+                self.historical_df.fillna(0, inplace=True)
+        return self.historical_df
 
     def _create_dataframe(self, transaction, first_creation=False):
         start_date = transaction["date"]
         if first_creation:
             end_date = datetime.date(datetime.now())
         else:
-            end_date = self.cash_df.index[0] - pd.Timedelta(days=1)
+            end_date = self.historical_df.index[0] - pd.Timedelta(days=1)
         dates = pd.date_range(start=start_date, end=end_date, freq="D")
         df = pd.DataFrame(
             {transaction["currency"]: 0}, index=dates)
@@ -130,12 +130,14 @@ class Cash():
                                                transaction["date"])
 
     def get_total_value(self, currency_df):
-        df = self.cash_df * currency_df[self.cash_df.columns]
+        df = self.historical_df * currency_df[self.historical_df.columns]
         df = df.dropna(how='all')
-        df['Total_USD'] = df.sum(axis=1)
-        df['Total'] = df['Total_USD'].div(currency_df[self.currency])
-        self.cash_df['Total'] = df['Total']
-        return self.cash_df
+        df['Total_base'] = df.sum(axis=1)
+        df['Total'] = df['Total_base'].div(currency_df[self._currency])
+        # self.historical_df['Total'] = df['Total']
+        self.total_base_currency = pd.Series(df['Total_base'])
+        self.total_actual_currency = pd.Series(df['Total'])
+        return self.total_actual_currency
 
 
 # -------------------------------------------------------------
@@ -152,7 +154,7 @@ if __name__ == "__main__":
     test(tr2)
     test(tr3)
     test(tr4)
-    print("df at the end: ", pesto.cash_df)
-    test_df = pesto.ex.currencies_df
+    print("df at the end: ", pesto.historical_df)
+    test_df = pesto.exchange_rates.currencies_df
     x = pesto.get_total_value(test_df)
     print("yooooooooooooooooooooooooooo", x)
