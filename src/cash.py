@@ -57,15 +57,17 @@ class Cash:
 
     def _validate_transaction(self, transaction):
         # this method should be changed
-        if transaction["amount"] >= 0:
+        tr = transaction
+        if tr["amount"] >= 0:
             return True
         else:
             if (not self.historical_df.empty and
-                transaction["currency"] in self.historical_df.columns and
-                transaction["amount"] + (min(self.historical_df[transaction["currency"]].values)) >= 0):
+                tr["currency"] in self.historical_df.columns and
+                (tr["amount"] +
+                 (min(self.historical_df[tr["currency"]].values)) >= 0)):
                 return True
             else:
-                print("There is not enough cash available for this transaction.")
+                print("Not enough cash available for this transaction.")
                 while True:
                     decision = input("Test it? (Yes or No)")
                     if decision.lower() == "yes":
@@ -73,7 +75,8 @@ class Cash:
                     elif decision.lower() == "no":
                         return False
                     else:
-                        print("TypeError - The answer {} is incorrect.".format(decision))
+                        print(("TypeError - The answer {} is incorrect."
+                               .format(decision)))
 
     def add_transaction_to_list(self, transaction):
         # not done yet
@@ -127,7 +130,7 @@ class Cash:
 
     def _update_exchange_rates(self, transaction):
         Currency().set_exchange_rates(transaction["currency"],
-                                               transaction["date"])
+                                      transaction["date"])
 
     def get_total_value(self, currency_df):
         df = self.historical_df * currency_df[self.historical_df.columns]
@@ -142,10 +145,14 @@ class Cash:
 
 # -------------------------------------------------------------
 if __name__ == "__main__":
-    tr1 = {"date": "2021-01-01", "type": 'Cash-In', "currency": "HUF", "amount": 10}
-    tr2 = {"date": "2021-01-01", "type": 'Cash-In', "currency": "HUF", "amount": 10}
-    tr3 = {"date": "2020-01-01", "type": 'Cash-In', "currency": "USD", "amount": 10}
-    tr4 = {"date": "2019-01-01", "type": 'Cash-In', "currency": "HUF", "amount": 1}
+    tr1 = {"date": "2021-01-01", "type": 'Cash-In',
+           "currency": "HUF", "amount": 10}
+    tr2 = {"date": "2021-01-01", "type": 'Cash-In',
+           "currency": "HUF", "amount": 10}
+    tr3 = {"date": "2020-01-01", "type": 'Cash-In',
+           "currency": "USD", "amount": 10}
+    tr4 = {"date": "2019-01-01", "type": 'Cash-In',
+           "currency": "HUF", "amount": 1}
     pesto = Cash()
 
     def test(tr):
