@@ -62,7 +62,7 @@ class Currency:
             self._set_start_date(start_date)
         if self.currencies_df.empty:
             df = self._create_dataframe(self.start_date, self.today)
-        if not self._check_currency(currency): 
+        if not self._check_currency(currency):
             df = (self._add_currency_to_df(currency, self.currencies_df,
                                            self.start_date, self.today))
         if start_date < self.start_date:
