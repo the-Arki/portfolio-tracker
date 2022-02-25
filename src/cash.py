@@ -3,7 +3,7 @@ from datetime import datetime
 from currency import Currency
 
 
-class Cash():
+class Cash:
     """
     Calculates the amount of available cash in the portfolio for each day.
     The currencies are handled separately
@@ -126,7 +126,7 @@ class Cash():
         return df
 
     def _update_exchange_rates(self, transaction):
-        self.exchange_rates.set_exchange_rates(transaction["currency"],
+        Currency().set_exchange_rates(transaction["currency"],
                                                transaction["date"])
 
     def get_total_value(self, currency_df):
@@ -157,4 +157,4 @@ if __name__ == "__main__":
     print("df at the end: ", pesto.historical_df)
     test_df = pesto.exchange_rates.currencies_df
     x = pesto.get_total_value(test_df)
-    print("yooooooooooooooooooooooooooo", x)
+    print("yooooooooooooooooooooooooooo\n", x)

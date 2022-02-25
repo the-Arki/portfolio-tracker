@@ -6,7 +6,7 @@ from stock import Stock
 from currency import Currency
 
 
-class Portfolio():
+class Portfolio:
     """Collects a portfolio of the following elements:
         -Cash
         -Stock
@@ -25,16 +25,16 @@ class Portfolio():
     def get_total_value(self):
         items_list = [self.bond, self.cash, self.stock]
         df = pd.DataFrame()
-        print(self.cash.historical_df)
         for item in items_list:
-            print(item.historical_df)
-            if not item.historical_df.empty:
-                print(item.historical_df)
-                df["yo"] = item.historical_df['Total'].copy()
-                print('lefutott')
-                print(item.historical_df)
-            else:
+            print('item: {}'.format(item.__class__.__name__))
+            if item.historical_df.empty:
                 print('hat ez ures volt')
+            else:
+                df[item.__class__.__name__] = item.total_actual_currency.copy()
+                print('lefutott')
+                df.append(df[item.__class__.__name__])
+        total = df.sum(axis=1)
+        return total
 
     def set_currency(self, currency):
         self.currency = currency
@@ -45,14 +45,23 @@ class Portfolio():
 
 
 # ------------------------------------------------------
-tr1 = {"date": "2021-01-01", "type": 'Cash-In', "currency": "EUR", "amount": 1000}
-x = Portfolio()
-x.cash.handle_transaction(tr1)
-exch_df = x.exchange_rates.currencies_df
-print(exch_df)
-print(x.cash.historical_df)
-x.cash.get_total_value(exch_df)
-x.get_total_value()
-print(x.cash._currency)
-x.change_currency("EUR")
-print(x.cash._currency)
+if __name__ == "__main__":
+    tr1 = {"date": "2021-01-01", "type": 'Cash-In', "currency": "EUR", "amount": 1000}
+    tr2 = {"date": "2020-01-01", "type": 'Cash-In', "currency": "HUF", "amount": 10000}
+    x = Portfolio()
+    # print(Currency().currencies_df)
+    x.cash.handle_transaction(tr1)
+    # print(Currency().currencies_df)
+    exch_df = Currency().currencies_df
+    x.cash.get_total_value(exch_df)
+    x.set_currency("EUR")
+    x.cash.handle_transaction(tr2)
+    exch_df = Currency().currencies_df
+    x.cash.get_total_value(exch_df)
+    print('ez az exchange db........................\n', Currency().currencies_df)
+    x.get_total_value()
+    print('---------------now with japanese yen-----------------------------')
+    x.set_currency("JPY")
+    x.cash.get_total_value(Currency().currencies_df)
+    # print("just for fun\n", Currency().currencies_df)
+    x.get_total_value()

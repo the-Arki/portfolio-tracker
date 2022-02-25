@@ -3,7 +3,7 @@ from pandas_datareader import data as web
 from datetime import datetime
 
 
-class Currency():
+class Currency:
     """
     This class converts the used currencies to a base currency and from there
     to the required one.
@@ -21,7 +21,7 @@ class Currency():
     """
     _base_currency = 'USD'
     today = datetime.date(datetime.now())
-    currencies_df = pd.DataFrame
+    currencies_df = pd.DataFrame()
     start_date = None
 
     @classmethod
@@ -56,37 +56,38 @@ class Currency():
         If the given start date is earlier than the current self.start_date,
         then update all values with this new start.
         """
+        df = self.currencies_df
         if not self.start_date:
             self._set_start_date(start_date)
         if self.currencies_df.empty:
-            self.currencies_df = self._create_dataframe(self.start_date,
-                                                        self.today)
-        if not self._check_currency(currency):
-            self.currencies_df = (
-                self._add_currency_to_df(currency, self.currencies_df,
-                                         self.start_date, self.today))
+            df = self._create_dataframe(self.start_date, self.today)
+        if not self._check_currency(currency): 
+            df = (self._add_currency_to_df(currency, self.currencies_df,
+                                           self.start_date, self.today))
         if start_date < self.start_date:
             end_date = pd.to_datetime(self.start_date) - pd.Timedelta(days=1)
-            self.currencies_df = self.update_df(start_date, end_date,
-                                                 self.currencies_df)
-        self._change_df_in_class(self.currencies_df)
-        return self.currencies_df
+            df = self.update_df(start_date, end_date, self.currencies_df)
+        self._change_df_in_class(df)
+        return df
 
     def _add_currency_to_df(self, currency, df, start_date, end_date):
         """Add the currency to the exchange rates database.
         If the first value is NaN, then look for an earlier value to start.
         """
+        df_ = df
         if currency == self._base_currency:
-            df[currency] = 1
+            df_[currency] = 1
             return df
-        df[currency] = (web.DataReader(currency + self._base_currency + '=X',
+        data = (web.DataReader(currency + self._base_currency + '=X',
                         data_source='yahoo', start=start_date,
                         end=end_date)['Adj Close'])
+        data = data.drop_duplicates(keep='last')
+        df_[currency] = data
         if pd.isna(df.loc[start_date, currency]):
-            df.loc[start_date, currency] = (
+            df_.loc[start_date, currency] = (
                 self._get_first_value(currency, start_date))
-        df[currency].ffill(inplace=True)
-        return df
+        df_[currency].ffill(inplace=True)
+        return df_
 
     def _get_first_value(self, currency, start_date):
         """Check for the first valid exchange rate before start_date
@@ -120,9 +121,9 @@ class Currency():
 # -------------------------------------------------------------
 if __name__ == "__main__":
     c = Currency()
-    c.set_exchange_rates('HUF', '2022-02-10')
+    c.set_exchange_rates('HUF', '2022-02-22')
     # print(c.currencies_df)
     # print(c.start_date)
-    c.set_exchange_rates('EUR', '2022-02-05')
+    # c.set_exchange_rates('EUR', '2022-02-05')
     print(c.currencies_df)
     # print('start: ', c.start_date)
