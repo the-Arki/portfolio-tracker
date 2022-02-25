@@ -17,7 +17,8 @@ class Currency:
         -get exchange rates for currency to _base_currency pairs
             and store them in a DataFrame (currencies_df)
         -if the start_date < previous start_date:
-            -update dataframe with the missing values (the last date has to be today)
+            -update dataframe with the missing values
+            (the last date has to be today)
     """
     _base_currency = 'USD'
     today = datetime.date(datetime.now())
@@ -79,8 +80,8 @@ class Currency:
             df_[currency] = 1
             return df
         data = (web.DataReader(currency + self._base_currency + '=X',
-                        data_source='yahoo', start=start_date,
-                        end=end_date)['Adj Close'])
+                               data_source='yahoo', start=start_date,
+                               end=end_date)['Adj Close'])
         data = data.drop_duplicates(keep='last')
         df_[currency] = data
         if pd.isna(df.loc[start_date, currency]):
