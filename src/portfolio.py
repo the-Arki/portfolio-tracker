@@ -46,8 +46,10 @@ class Portfolio:
 
 # ------------------------------------------------------
 if __name__ == "__main__":
-    tr1 = {"date": "2021-01-01", "type": 'Cash-In', "currency": "EUR", "amount": 1000}
-    tr2 = {"date": "2020-01-01", "type": 'Cash-In', "currency": "HUF", "amount": 10000}
+    tr1 = {"date": "2021-01-01", "type": 'Cash-In',
+           "currency": "EUR", "amount": 1000}
+    tr2 = {"date": "2020-01-01", "type": 'Cash-In',
+           "currency": "HUF", "amount": 10000}
     x = Portfolio()
     # print(Currency().currencies_df)
     x.cash.handle_transaction(tr1)
@@ -58,7 +60,7 @@ if __name__ == "__main__":
     x.cash.handle_transaction(tr2)
     exch_df = Currency().currencies_df
     x.cash.get_total_value(exch_df)
-    print('ez az exchange db........................\n', Currency().currencies_df)
+    print('ez az exchange db....................\n', Currency().currencies_df)
     x.get_total_value()
     print('---------------now with japanese yen-----------------------------')
     x.set_currency("JPY")
