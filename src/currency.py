@@ -63,7 +63,7 @@ class Currency:
         if self.currencies_df.empty:
             df = self._create_dataframe(self.start_date, self.today)
         if not self._check_currency(currency):
-            df = (self._add_currency_to_df(currency, self.currencies_df,
+            df = (self._add_currency_to_df(currency, df,
                                            self.start_date, self.today))
         if start_date < self.start_date:
             end_date = pd.to_datetime(self.start_date) - pd.Timedelta(days=1)
@@ -79,9 +79,17 @@ class Currency:
         if currency == self._base_currency:
             df_[currency] = 1
             return df
-        data = (web.DataReader(currency + self._base_currency + '=X',
-                               data_source='yahoo', start=start_date,
-                               end=end_date)['Adj Close'])
+        start_date_ = datetime.strptime(start_date, '%Y-%m-%d').date()
+        attempt = 0
+        while attempt < 10:
+            try:
+                data = (web.DataReader(currency + self._base_currency + '=X',
+                                       data_source='yahoo', start=start_date_,
+                                       end=end_date)['Adj Close'])
+                break
+            except KeyError:
+                start_date_ = start_date_ - pd.Timedelta(days=1)
+                attempt += 1
         data = data.drop_duplicates(keep='last')
         df_[currency] = data
         if pd.isna(df.loc[start_date, currency]):
@@ -122,7 +130,7 @@ class Currency:
 # -------------------------------------------------------------
 if __name__ == "__main__":
     c = Currency()
-    c.set_exchange_rates('HUF', '2022-02-22')
+    c.set_exchange_rates('HUF', '2022-03-13')
     # print(c.currencies_df)
     # print(c.start_date)
     # c.set_exchange_rates('EUR', '2022-02-05')

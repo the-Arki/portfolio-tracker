@@ -39,12 +39,38 @@ class Portfolios:
         pass
 
 ###############################################################################
-lista = ['kakas', 'birka']
-io_manager.write_json(lista, 'files/portfolio_names.json')
-x = Portfolios()
-print(x.instances)
-x.create_instance('kukorica')
-print(x.instances)
-x.delete_instance('kakas')
-print(x.instances)
-x.delete_instance('kakas')
+if __name__ == "__main__":
+    tr1 = {"date": "2021-01-01", "type": 'Cash-In',
+           "currency": "HUF", "amount": 10}
+    tr2 = {"date": "2021-01-01", "type": 'Withdraw',
+           "currency": "HUF", "amount": 10}
+    tr3 = {"date": "2020-01-01", "type": 'Cash-In',
+           "currency": "USD", "amount": 10}
+    tr4 = {"date": "2019-01-01", "type": 'Cash-In',
+           "currency": "HUF", "amount": 1}
+    lista = ['kakas', 'birka']
+    io_manager.write_json(lista, 'files/portfolio_names.json')
+    x = Portfolios()
+    print(x.instances)
+    x.create_instance('kukorica')
+    print(x.instances)
+    x.delete_instance('kakas')
+    print(x.instances)
+    x.delete_instance('kakas')
+    def handle_tr(name, transaction):
+        x.instances[name].cash.handle_transaction(transaction)
+        return x.instances[name].cash.cash_transactions_list
+    # x.instances['birka'].cash.handle_transaction(tr1)
+    def get_tot_value(name):
+        total_value = x.instances[name].cash.get_total_value(x.instances[name].exchange_rates.currencies_df)
+        return total_value
+    ####################
+    handle_tr('birka', tr1)
+    tot1 = get_tot_value('birka')
+    print(tot1)
+    
+    handle_tr('birka', tr2)
+    print(handle_tr('birka', tr3))
+    tot2 = get_tot_value('birka')
+    print(tot2)
+    print(x.instances['kukorica'].exchange_rates.currencies_df)
