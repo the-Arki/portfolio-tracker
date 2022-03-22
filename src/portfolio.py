@@ -15,7 +15,7 @@ class Portfolio:
     today = str(datetime.date(datetime.now()))
 
     def __init__(self, currency="HUF"):
-        self.exchange_rates = Currency()
+        self.exchange_rates = Currency
         self.currency = currency
         self.bond = Bond(currency)
         self.cash = Cash(currency)
@@ -66,4 +66,4 @@ if __name__ == "__main__":
     x.set_currency("JPY")
     x.cash.get_total_value(Currency().currencies_df)
     # print("just for fun\n", Currency().currencies_df)
-    x.get_total_value()
+    print(x.get_total_value())

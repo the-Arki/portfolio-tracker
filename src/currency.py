@@ -34,17 +34,19 @@ class Currency:
     def _set_start_date(cls, start):
         cls.start_date = start
 
-    def _check_currency(self, currency):
+    @classmethod
+    def _check_currency(cls, currency):
         """Check if currency is in the exchange rates database and
         return a boolean"""
-        if self.currencies_df.empty:
+        if cls.currencies_df.empty:
             return False
-        elif currency not in self.currencies_df.columns:
+        elif currency not in cls.currencies_df.columns:
             return False
         else:
             return True
 
-    def _create_dataframe(self, start_date, end_date):
+    @classmethod
+    def _create_dataframe(cls, start_date, end_date):
         "create a dataframe for exchange rates if it is not existing yet."
         start_date = start_date
         end_date = end_date
@@ -52,38 +54,44 @@ class Currency:
         df = pd.DataFrame(index=dates)
         return df
 
-    def set_exchange_rates(self, currency, start_date):
+    @classmethod
+    def set_exchange_rates(cls, currency, start_date):
         """Set the exchange range for the passed currency.
-        If the given start date is earlier than the current self.start_date,
+        If the given start date is earlier than the current cls.start_date,
         then update all values with this new start.
         """
-        df = self.currencies_df
-        if not self.start_date:
-            self._set_start_date(start_date)
-        if self.currencies_df.empty:
-            df = self._create_dataframe(self.start_date, self.today)
-        if not self._check_currency(currency):
-            df = (self._add_currency_to_df(currency, df,
-                                           self.start_date, self.today))
-        if start_date < self.start_date:
-            end_date = pd.to_datetime(self.start_date) - pd.Timedelta(days=1)
-            df = self.update_df(start_date, end_date, self.currencies_df)
-        self._change_df_in_class(df)
+        df_changed = False
+        df = cls.currencies_df
+        if not cls.start_date:
+            cls._set_start_date(start_date)
+        if cls.currencies_df.empty:
+            df = cls._create_dataframe(cls.start_date, cls.today)
+        if not cls._check_currency(currency):
+            df = (cls._add_currency_to_df(currency, df,
+                                          cls.start_date, cls.today))
+            df_changed = True
+        if start_date < cls.start_date:
+            end_date = pd.to_datetime(cls.start_date) - pd.Timedelta(days=1)
+            df = cls.update_df(start_date, end_date, cls.currencies_df)
+            df_changed = True
+        if df_changed:
+            cls._change_df_in_class(df)
         return df
 
-    def _add_currency_to_df(self, currency, df, start_date, end_date):
+    @classmethod
+    def _add_currency_to_df(cls, currency, df, start_date, end_date):
         """Add the currency to the exchange rates database.
         If the first value is NaN, then look for an earlier value to start.
         """
         df_ = df
-        if currency == self._base_currency:
+        if currency == cls._base_currency:
             df_[currency] = 1
             return df_
         start_date_ = datetime.strptime(start_date, '%Y-%m-%d').date()
         attempt = 0
         while attempt < 10:
             try:
-                data = (web.DataReader(currency + self._base_currency + '=X',
+                data = (web.DataReader(currency + cls._base_currency + '=X',
                                        data_source='yahoo', start=start_date_,
                                        end=end_date)['Adj Close'])
                 break
@@ -94,11 +102,12 @@ class Currency:
         df_[currency] = data
         if pd.isna(df.loc[start_date, currency]):
             df_.loc[start_date, currency] = (
-                self._get_first_value(currency, start_date))
+                cls._get_first_value(currency, start_date))
         df_[currency].ffill(inplace=True)
         return df_
 
-    def _get_first_value(self, currency, start_date):
+    @classmethod
+    def _get_first_value(cls, currency, start_date):
         """Check for the first valid exchange rate before start_date
         and replace the Nan value at the first date."""
         days_back = 1
@@ -108,7 +117,7 @@ class Currency:
             end_date_ = start_date_ + pd.Timedelta(days=1)
             start_date_str = start_date_.strftime('%Y-%m-%d')
             end_date_str = end_date_.strftime('%Y-%m-%d')
-            df = (web.DataReader(currency + self._base_currency + '=X',
+            df = (web.DataReader(currency + cls._base_currency + '=X',
                                  data_source='yahoo', start=start_date_str,
                                  end=end_date_str)['Adj Close'])
             if df.index[0] != start_date_:
@@ -116,20 +125,21 @@ class Currency:
             else:
                 return df.iloc[0]
 
-    def update_df(self, start_date, end_date, df_to_extend):
+    @classmethod
+    def update_df(cls, start_date, end_date, df_to_extend):
         """ Set exchange rates for the missing dates."""
         end_date = end_date
-        df = self._create_dataframe(start_date, end_date)
+        df = cls._create_dataframe(start_date, end_date)
         for currency in df_to_extend.columns:
-            df = self._add_currency_to_df(currency, df, start_date, end_date)
+            df = cls._add_currency_to_df(currency, df, start_date, end_date)
         extended_df = pd.concat([df, df_to_extend], sort=True)
-        self._set_start_date(start_date)
+        cls._set_start_date(start_date)
         return extended_df
 
 
 # -------------------------------------------------------------
 if __name__ == "__main__":
-    c = Currency()
+    c = Currency
     c.set_exchange_rates('HUF', '2022-03-13')
     # print(c.currencies_df)
     # print(c.start_date)

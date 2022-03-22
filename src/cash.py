@@ -27,7 +27,7 @@ class Cash:
         self.historical_df = cash_df
         self.cash_transactions_list = []
         self._currency = currency
-        self.exchange_rates = Currency()
+        self.exchange_rates = Currency
 
     def handle_transaction(self, transaction):
         tr = self._get_transaction(transaction)
