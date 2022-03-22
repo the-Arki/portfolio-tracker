@@ -78,7 +78,7 @@ class Currency:
         df_ = df
         if currency == self._base_currency:
             df_[currency] = 1
-            return df
+            return df_
         start_date_ = datetime.strptime(start_date, '%Y-%m-%d').date()
         attempt = 0
         while attempt < 10:
@@ -90,7 +90,7 @@ class Currency:
             except KeyError:
                 start_date_ = start_date_ - pd.Timedelta(days=1)
                 attempt += 1
-        data = data.drop_duplicates(keep='last')
+        data = data[~data.index.duplicated(keep='first')]
         df_[currency] = data
         if pd.isna(df.loc[start_date, currency]):
             df_.loc[start_date, currency] = (
