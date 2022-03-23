@@ -41,14 +41,14 @@ class Portfolios:
 
 ###############################################################################
 if __name__ == "__main__":
-    tr1 = {"date": "2021-01-01", "type": 'Cash-In',
+    tr1 = {"date": "2022-03-21", "type": 'Cash-In',
+           "currency": "HUF", "amount": 220}
+    tr2 = {"date": "2022-03-22", "type": 'Withdraw',
            "currency": "HUF", "amount": 10}
-    tr2 = {"date": "2021-01-01", "type": 'Withdraw',
-           "currency": "HUF", "amount": 10}
-    tr3 = {"date": "2020-01-01", "type": 'Cash-In',
+    tr3 = {"date": "2022-03-19", "type": 'Cash-In',
            "currency": "USD", "amount": 10}
-    tr4 = {"date": "2019-01-01", "type": 'Cash-In',
-           "currency": "HUF", "amount": 1}
+    tr4 = {"date": "2022-03-15", "type": 'Cash-In',
+           "currency": "EUR", "amount": 1}
     lista = ['kakas', 'birka']
     io_manager.write_json(lista, 'files/portfolio_names.json')
     x = Portfolios()
@@ -63,7 +63,7 @@ if __name__ == "__main__":
         return x.instances[name].cash.cash_transactions_list
     # x.instances['birka'].cash.handle_transaction(tr1)
     def get_tot_value(name):
-        total_value = x.instances[name].cash.get_total_value(x.instances[name].exchange_rates.currencies_df)
+        total_value = x.instances[name].cash.get_total_value(Currency().currencies_df)
         return total_value
     ####################
     handle_tr('birka', tr1)
@@ -72,7 +72,8 @@ if __name__ == "__main__":
     
     handle_tr('birka', tr2)
     print(handle_tr('birka', tr3))
+    handle_tr('kukorica', tr4)
     tot2 = get_tot_value('birka')
-    print(tot2)
+    print("ez a tot2: ", tot2)
     print(x.instances['kukorica'].exchange_rates.currencies_df)
     print('név: ', x.instances["kukorica"].name)

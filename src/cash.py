@@ -106,7 +106,7 @@ class Cash:
             if tr["date"] < str(df.index[0]):
                 temp_df = self._create_dataframe(tr)
                 df = pd.concat([temp_df, df], copy=False, sort=True, axis=0)
-                df.fillna(0)
+                df = df.fillna(0)
             if tr["currency"] in df.keys():
                 df.loc[df.index >= tr["date"], tr['currency']] = (
                     df[tr["currency"]] + tr['amount'])
