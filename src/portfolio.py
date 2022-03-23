@@ -14,11 +14,12 @@ class Portfolio:
     """
     today = str(datetime.date(datetime.now()))
 
-    def __init__(self, currency="HUF"):
+    def __init__(self, currency="HUF", name=None):
         self.exchange_rates = Currency
         self.currency = currency
         self.bond = Bond(currency)
-        self.cash = Cash(currency)
+        self.cash = Cash(currency, name=name)
+        self.name = name
         self.stock = Stock(currency)
         self.set_currency(currency)
 

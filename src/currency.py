@@ -37,8 +37,6 @@ class Currency:
 
     @classmethod
     def _set_start_date(cls, start):
-        print(start)
-        print(type(start))
         cls.start_date = start
 
     @classmethod
@@ -67,7 +65,7 @@ class Currency:
         If the given start date is earlier than the current cls.start_date,
         then update all values with this new start.
         """
-        df_changed = False
+        # df_changed = False
         df = cls.currencies_df.copy()
         if not cls.start_date:
             cls._set_start_date(start_date)
@@ -76,14 +74,15 @@ class Currency:
         if not cls._check_currency(currency):
             df = (cls._add_currency_to_df(currency, df,
                                           cls.start_date, cls.today))
-            df_changed = True
+            # df_changed = True
         if start_date < cls.start_date:
             end_date = pd.to_datetime(cls.start_date) - pd.Timedelta(days=1)
-            df = cls.update_df(start_date, end_date, df)
-            df_changed = True
-        if df_changed:
+            df = cls._lower_update_df(start_date, end_date, df)
+            # df_changed = True
+        if not df.equals(cls.currencies_df):
             cls._change_df_in_class(df)
             cls.save_df(df)
+            print("are not equal")
         return df
 
     @classmethod
@@ -139,7 +138,7 @@ class Currency:
                 return df.iloc[0]
 
     @classmethod
-    def update_df(cls, start_date, end_date, df_to_extend):
+    def _lower_update_df(cls, start_date, end_date, df_to_extend):
         """ Set exchange rates for the missing dates."""
         end_date = end_date
         df = cls._create_dataframe(start_date, end_date)
@@ -149,6 +148,22 @@ class Currency:
         cls._set_start_date(start_date)
         return extended_df
 
+    @classmethod
+    def update_df(cls):
+        start_date = cls.currencies_df.index[-1].strftime('%Y-%m-%d')
+        print(start_date)
+        end_date = cls.today
+        df_to_extend = cls.currencies_df.copy()
+        df = cls._create_dataframe(start_date, end_date)
+        for currency in df_to_extend.columns:
+            df = cls._add_currency_to_df(currency, df, start_date, end_date)
+        extended_df = pd.concat([df_to_extend, df], sort=True)
+        extended_df = extended_df[~extended_df.index.duplicated(keep='last')]
+        if not extended_df.equals(df_to_extend):
+            cls.save_df(extended_df)
+            cls._change_df_in_class(df)
+        return extended_df
+            
 
 # -------------------------------------------------------------
 if __name__ == "__main__":
@@ -159,3 +174,4 @@ if __name__ == "__main__":
     # c.set_exchange_rates('EUR', '2022-02-05')
     # print(c.currencies_df)
     # print('start: ', c.start_date)
+    print(c.update_df())

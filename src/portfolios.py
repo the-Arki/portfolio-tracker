@@ -15,11 +15,12 @@ class Portfolios:
         self.portfolio_names = io_manager.read_json(
             'files/portfolio_names.json')
         for name in self.portfolio_names:
-            self.instances[name] = Portfolio()
+            print("név az alején: ", name)
+            self.instances[name] = Portfolio(name=name)
 
     def create_instance(self, name):
         self.portfolio_names.append(name)
-        self.instances[name] = Portfolio()
+        self.instances[name] = Portfolio(name=name)
         io_manager.write_json(self.portfolio_names, 'files/portfolio_names.json')
 
     def delete_instance(self, name):
@@ -74,3 +75,4 @@ if __name__ == "__main__":
     tot2 = get_tot_value('birka')
     print(tot2)
     print(x.instances['kukorica'].exchange_rates.currencies_df)
+    print('név: ', x.instances["kukorica"].name)

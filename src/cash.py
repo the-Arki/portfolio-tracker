@@ -19,15 +19,17 @@ class Cash:
     -sort cash_transactions_list by date
     -update the database (cash_df) with the new value
     -add / update "total" column in database in the main currency (currency)
-    -update exchange rates in Currency class --> _update_exchange_rates
+    -update exchange rates in Currency class --> _set_exchange_rates
         -edit transaction in transactions_list if needed
     """
+    today = datetime.date(datetime.now())
 
-    def __init__(self, currency="HUF", cash_df=pd.DataFrame()):
+    def __init__(self, currency="HUF", cash_df=pd.DataFrame(), name=None):
         self.historical_df = cash_df
         self.cash_transactions_list = []
         self._currency = currency
         self.exchange_rates = Currency
+        self.name = name
 
     def handle_transaction(self, transaction):
         tr = self._get_transaction(transaction)
@@ -36,8 +38,8 @@ class Cash:
         if self._validate_transaction(tr):
             self.add_transaction_to_list(tr)
             self._sort_transactions_list()
-            self._add_transaction_to_df(tr)
-            self._update_exchange_rates(tr)
+            self.historical_df = self._add_transaction_to_df(tr, self.historical_df)
+            self._set_exchange_rates(tr)
         else:
             return
 
@@ -95,27 +97,23 @@ class Cash:
             self.cash_transactions_list,
             key=lambda transaction: transaction["date"])
 
-    def _add_transaction_to_df(self, transaction):
+    def _add_transaction_to_df(self, transaction, df):
         tr = transaction
-        if self.historical_df.empty:
-            self.historical_df = self._create_dataframe(
-                tr, first_creation=True)
-            self.historical_df[tr["currency"]] = tr["amount"]
+        if df.empty:
+            df = self._create_dataframe(tr, first_creation=True)
+            df[tr["currency"]] = tr["amount"]
         else:
-            if tr["date"] < str(self.historical_df.index[0]):
+            if tr["date"] < str(df.index[0]):
                 temp_df = self._create_dataframe(tr)
-                self.historical_df = pd.concat([temp_df, self.historical_df],
-                                               copy=False, sort=True, axis=0)
-                self.historical_df.fillna(0, inplace=True)
-            if tr["currency"] in self.historical_df.keys():
-                self.historical_df.loc[self.historical_df.index >= tr["date"],
-                                       tr['currency']] = self.historical_df[
-                            tr["currency"]] + tr['amount']
+                df = pd.concat([temp_df, df], copy=False, sort=True, axis=0)
+                df.fillna(0)
+            if tr["currency"] in df.keys():
+                df.loc[df.index >= tr["date"], tr['currency']] = (
+                    df[tr["currency"]] + tr['amount'])
             else:
-                self.historical_df.loc[self.historical_df.index >= tr["date"],
-                                       tr['currency']] = tr['amount']
-                self.historical_df.fillna(0, inplace=True)
-        return self.historical_df
+                df.loc[df.index >= tr["date"], tr['currency']] = tr['amount']
+                df.fillna(0)
+        return df
 
     def _create_dataframe(self, transaction, first_creation=False):
         start_date = transaction["date"]
@@ -128,9 +126,21 @@ class Cash:
             {transaction["currency"]: 0}, index=dates)
         return df
 
-    def _update_exchange_rates(self, transaction):
+    def _set_exchange_rates(self, transaction):
         Currency().set_exchange_rates(transaction["currency"],
                                       transaction["date"])
+
+    # def update_exchange_rates(self):
+    #     end_date = self.today
+    #     start_date = Currency().currencies_df.index[-1]
+    #     if start_date
+
+    def update_historical_df(self, df):
+        end_date = self.today
+        if df.index[-1] < end_date:
+            df = df.ffill()
+            
+        return df
 
     def get_total_value(self, currency_df):
         df = self.historical_df * currency_df[self.historical_df.columns]
