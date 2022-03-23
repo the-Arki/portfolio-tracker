@@ -21,9 +21,14 @@ class Currency:
             (the last date has to be today)
     """
     _base_currency = 'USD'
-    today = datetime.date(datetime.now())
-    currencies_df = pd.DataFrame()
     start_date = None
+    today = datetime.date(datetime.now())
+    try:
+        currencies_df = pd.read_csv('files/exchange_rates.csv',
+                                    parse_dates=True, index_col=[0])
+        start_date = currencies_df.index[0].strftime("%Y-%m-%d")
+    except (pd.errors.EmptyDataError, FileNotFoundError):
+        currencies_df = pd.DataFrame()
 
     @classmethod
     def _change_df_in_class(cls, df):
@@ -32,6 +37,8 @@ class Currency:
 
     @classmethod
     def _set_start_date(cls, start):
+        print(start)
+        print(type(start))
         cls.start_date = start
 
     @classmethod
@@ -61,7 +68,7 @@ class Currency:
         then update all values with this new start.
         """
         df_changed = False
-        df = cls.currencies_df
+        df = cls.currencies_df.copy()
         if not cls.start_date:
             cls._set_start_date(start_date)
         if cls.currencies_df.empty:
@@ -72,18 +79,24 @@ class Currency:
             df_changed = True
         if start_date < cls.start_date:
             end_date = pd.to_datetime(cls.start_date) - pd.Timedelta(days=1)
-            df = cls.update_df(start_date, end_date, cls.currencies_df)
+            df = cls.update_df(start_date, end_date, df)
             df_changed = True
         if df_changed:
             cls._change_df_in_class(df)
+            cls.save_df(df)
         return df
+
+    @classmethod
+    def save_df(cls, df):
+        print('df before saving: \n', df)
+        df.to_csv('files/exchange_rates.csv')
 
     @classmethod
     def _add_currency_to_df(cls, currency, df, start_date, end_date):
         """Add the currency to the exchange rates database.
         If the first value is NaN, then look for an earlier value to start.
         """
-        df_ = df
+        df_ = df.copy()
         if currency == cls._base_currency:
             df_[currency] = 1
             return df_
@@ -100,7 +113,7 @@ class Currency:
                 attempt += 1
         data = data[~data.index.duplicated(keep='first')]
         df_[currency] = data
-        if pd.isna(df.loc[start_date, currency]):
+        if pd.isna(df_.loc[start_date, currency]):
             df_.loc[start_date, currency] = (
                 cls._get_first_value(currency, start_date))
         df_[currency].ffill(inplace=True)
@@ -144,5 +157,5 @@ if __name__ == "__main__":
     # print(c.currencies_df)
     # print(c.start_date)
     # c.set_exchange_rates('EUR', '2022-02-05')
-    print(c.currencies_df)
+    # print(c.currencies_df)
     # print('start: ', c.start_date)

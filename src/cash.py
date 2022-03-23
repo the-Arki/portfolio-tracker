@@ -145,13 +145,13 @@ class Cash:
 
 # -------------------------------------------------------------
 if __name__ == "__main__":
-    tr1 = {"date": "2021-01-01", "type": 'Cash-In',
+    tr1 = {"date": "2022-03-21", "type": 'Cash-In',
            "currency": "HUF", "amount": 10}
-    tr2 = {"date": "2021-01-01", "type": 'Cash-In',
+    tr2 = {"date": "2022-03-22", "type": 'Cash-In',
            "currency": "HUF", "amount": 10}
-    tr3 = {"date": "2020-01-01", "type": 'Cash-In',
+    tr3 = {"date": "2022-03-15", "type": 'Cash-In',
            "currency": "USD", "amount": 10}
-    tr4 = {"date": "2019-01-01", "type": 'Cash-In',
+    tr4 = {"date": "2022-03-11", "type": 'Cash-In',
            "currency": "HUF", "amount": 1}
     pesto = Cash()
 
