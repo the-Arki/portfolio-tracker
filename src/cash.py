@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import datetime
 from currency import Currency
+from io_manager import read_json, write_json
 
 
 class Cash:
@@ -24,9 +25,12 @@ class Cash:
     """
     today = datetime.date(datetime.now())
 
-    def __init__(self, currency="HUF", cash_df=pd.DataFrame(), name=None):
+    def __init__(self, currency="HUF", cash_df=pd.DataFrame(), tr_list=[], name=None):
         self.historical_df = cash_df
-        self.cash_transactions_list = []
+        self.cash_transactions_list = tr_list
+        if self.cash_transactions_list:
+            for item in self.cash_transactions_list:
+                self.historical_df = self._add_transaction_to_df(item, self.historical_df)
         self._currency = currency
         self.exchange_rates = Currency
         self.name = name
@@ -38,6 +42,7 @@ class Cash:
         if self._validate_transaction(tr):
             self.add_transaction_to_list(tr)
             self._sort_transactions_list()
+            self.save_transactions_list()
             self.historical_df = self._add_transaction_to_df(tr, self.historical_df)
             self._set_exchange_rates(tr)
         else:
@@ -96,6 +101,11 @@ class Cash:
         self.cash_transactions_list = sorted(
             self.cash_transactions_list,
             key=lambda transaction: transaction["date"])
+
+    def save_transactions_list(self):
+        tr_dict = read_json('files/transactions.json')
+        tr_dict[self.name]['Cash'] = self.cash_transactions_list
+        write_json(tr_dict, 'files/transactions.json')
 
     def _add_transaction_to_df(self, transaction, df):
         tr = transaction

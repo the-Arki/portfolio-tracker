@@ -14,14 +14,21 @@ class Portfolio:
     """
     today = str(datetime.date(datetime.now()))
 
-    def __init__(self, currency="HUF", name=None):
+    def __init__(self, currency="HUF", tr_dict={}, name=None):
+        self.transactions_dict = self.setup_tr_dict(tr_dict)
         self.exchange_rates = Currency
         self.currency = currency
-        self.bond = Bond(currency)
-        self.cash = Cash(currency, name=name)
+        self.bond = Bond(currency, tr_list=self.transactions_dict['Bond'], name=name)
+        self.cash = Cash(currency, tr_list=self.transactions_dict['Cash'], name=name)
         self.name = name
-        self.stock = Stock(currency)
+        self.stock = Stock(currency, tr_list=self.transactions_dict['Stock'], name=name)
         self.set_currency(currency)
+
+    def setup_tr_dict(self, tr_dict):
+        if not tr_dict:
+            for item in ('Bond', 'Cash', 'Stock'):
+                tr_dict[item] = []
+        return tr_dict
 
     def get_total_value(self):
         items_list = [self.bond, self.cash, self.stock]
