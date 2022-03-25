@@ -36,12 +36,8 @@ class Portfolio:
         items_list = [self.bond, self.cash, self.stock]
         df = pd.DataFrame()
         for item in items_list:
-            print('item: {}'.format(item.__class__.__name__))
-            if item.historical_df.empty:
-                print('hat ez ures volt')
-            else:
+            if not item.historical_df.empty:
                 df[item.__class__.__name__] = item.get_total_value(self.exchange_rates.currencies_df, in_base_currency=base)
-                print('lefutott')
                 df.append(df[item.__class__.__name__])
         total = df.sum(axis=1)
         return total
