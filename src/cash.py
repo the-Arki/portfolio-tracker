@@ -152,13 +152,15 @@ class Cash:
             
         return df
 
-    def get_total_value(self, currency_df):
+    def get_total_value(self, currency_df, in_base_currency=True):
         df = self.historical_df * currency_df[self.historical_df.columns]
         df = df.dropna(how='all')
         df['Total_base'] = df.sum(axis=1)
         df['Total'] = df['Total_base'].div(currency_df[self._currency])
         # self.historical_df['Total'] = df['Total']
         self.total_base_currency = pd.Series(df['Total_base'])
+        if in_base_currency:
+            return self.total_base_currency
         self.total_actual_currency = pd.Series(df['Total'])
         return self.total_actual_currency
 
