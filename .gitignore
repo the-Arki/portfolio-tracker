@@ -130,3 +130,6 @@ dmypy.json
 
 # Folder where the created files are stored
 files/
+
+# Test file
+scr/temporary_to_delete.py
