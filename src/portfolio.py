@@ -1,3 +1,4 @@
+from email import base64mime
 import pandas as pd
 from datetime import datetime
 from bond import Bond
@@ -30,7 +31,8 @@ class Portfolio:
                 tr_dict[item] = []
         return tr_dict
 
-    def get_total_value(self):
+    def get_total_value(self, in_base_currency=True):
+        base = in_base_currency
         items_list = [self.bond, self.cash, self.stock]
         df = pd.DataFrame()
         for item in items_list:
@@ -38,13 +40,16 @@ class Portfolio:
             if item.historical_df.empty:
                 print('hat ez ures volt')
             else:
-                df[item.__class__.__name__] = item.total_actual_currency.copy()
+                df[item.__class__.__name__] = item.get_total_value(self.exchange_rates.currencies_df, in_base_currency=base)
                 print('lefutott')
                 df.append(df[item.__class__.__name__])
         total = df.sum(axis=1)
         return total
 
     def set_currency(self, currency):
+        """set the currency for all the instances (bond, cash, stock),
+        and updates the exchange rates accordingly in currency class.
+        returns the new currency."""
         self.currency = currency
         for obj in [self.bond, self.cash, self.stock]:
             obj._currency = currency
