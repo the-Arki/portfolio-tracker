@@ -153,6 +153,10 @@ class Cash:
         return df
 
     def get_total_value(self, currency_df, in_base_currency=True):
+        """get exchange rates df from currency class as 'currency_df' and 
+        optionally in_base_currency.
+        returns the total cash value of the instance in base currency (USD) or
+        in the actual currency of the instance if 'in_base_currency' is set to False"""
         df = self.historical_df * currency_df[self.historical_df.columns]
         df = df.dropna(how='all')
         df['Total_base'] = df.sum(axis=1)
