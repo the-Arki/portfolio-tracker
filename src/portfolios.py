@@ -93,7 +93,7 @@ if __name__ == "__main__":
         return x.instances[name].cash.cash_transactions_list
     # x.instances['birka'].cash.handle_transaction(tr1)
     def get_tot_value(name):
-        total_value = x.instances[name].cash.get_total_value(Currency().currencies_df)
+        total_value = x.instances[name].cash.get_total_value(in_base_currency=False)
         return total_value
     # ####################
     # handle_tr('birka', tr1)

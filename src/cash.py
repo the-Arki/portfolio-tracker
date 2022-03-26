@@ -152,15 +152,16 @@ class Cash:
             
         return df
 
-    def get_total_value(self, currency_df, in_base_currency=True):
+    def get_total_value(self, in_base_currency=True):
         """get exchange rates df from currency class as 'currency_df' and 
         optionally in_base_currency.
         returns the total cash value of the instance in base currency (USD) or
         in the actual currency of the instance if 'in_base_currency' is set to False"""
-        df = self.historical_df * currency_df[self.historical_df.columns]
+        exchange_rates = self.exchange_rates.currencies_df
+        df = self.historical_df * exchange_rates[self.historical_df.columns]
         df = df.dropna(how='all')
         df['Total_base'] = df.sum(axis=1)
-        df['Total'] = df['Total_base'].div(currency_df[self._currency])
+        df['Total'] = df['Total_base'].div(exchange_rates[self._currency])
         # self.historical_df['Total'] = df['Total']
         self.total_base_currency = pd.Series(df['Total_base'])
         if in_base_currency:
@@ -189,5 +190,5 @@ if __name__ == "__main__":
     test(tr4)
     print("df at the end: ", pesto.historical_df)
     test_df = pesto.exchange_rates.currencies_df
-    x = pesto.get_total_value(test_df)
+    x = pesto.get_total_value(in_base_currency=False)
     print("yooooooooooooooooooooooooooo\n", x)

@@ -9,5 +9,5 @@ class Bond():
         self.historical_df = bond_df
         self.transactions_list = tr_list
         self._currency = currency
-        self.exchange_rates = Currency()
+        self.exchange_rates = Currency
         self.name = name

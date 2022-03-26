@@ -37,7 +37,7 @@ class Portfolio:
         df = pd.DataFrame()
         for item in items_list:
             if not item.historical_df.empty:
-                df[item.__class__.__name__] = item.get_total_value(self.exchange_rates.currencies_df, in_base_currency=base)
+                df[item.__class__.__name__] = item.get_total_value(in_base_currency=base)
                 df.append(df[item.__class__.__name__])
         total = df.sum(axis=1)
         return total
