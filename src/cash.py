@@ -32,7 +32,7 @@ class Cash:
             for item in self.cash_transactions_list:
                 self.historical_df = self._add_transaction_to_df(item, self.historical_df)
         self._currency = currency
-        self.exchange_rates = Currency
+        self.exchange_rates = Currency().currencies_df
         self.name = name
 
     def handle_transaction(self, transaction):
@@ -157,11 +157,10 @@ class Cash:
         optionally in_base_currency.
         returns the total cash value of the instance in base currency (USD) or
         in the actual currency of the instance if 'in_base_currency' is set to False"""
-        exchange_rates = self.exchange_rates.currencies_df
-        df = self.historical_df * exchange_rates[self.historical_df.columns]
+        df = self.historical_df * self.exchange_rates[self.historical_df.columns]
         df = df.dropna(how='all')
         df['Total_base'] = df.sum(axis=1)
-        df['Total'] = df['Total_base'].div(exchange_rates[self._currency])
+        df['Total'] = df['Total_base'].div(self.exchange_rates[self._currency])
         # self.historical_df['Total'] = df['Total']
         self.total_base_currency = pd.Series(df['Total_base'])
         if in_base_currency:
@@ -189,6 +188,6 @@ if __name__ == "__main__":
     test(tr3)
     test(tr4)
     print("df at the end: ", pesto.historical_df)
-    test_df = pesto.exchange_rates.currencies_df
+    test_df = pesto.exchange_rates
     x = pesto.get_total_value(in_base_currency=False)
     print("yooooooooooooooooooooooooooo\n", x)

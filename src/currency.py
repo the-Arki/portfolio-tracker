@@ -87,7 +87,6 @@ class Currency:
 
     @classmethod
     def save_df(cls, df):
-        print('df before saving: \n', df)
         df.to_csv('files/exchange_rates.csv')
 
     @classmethod
@@ -163,7 +162,7 @@ class Currency:
             cls.save_df(extended_df)
             cls._change_df_in_class(df)
         return extended_df
-            
+
 
 # -------------------------------------------------------------
 if __name__ == "__main__":
