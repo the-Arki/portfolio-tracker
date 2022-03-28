@@ -2,9 +2,10 @@ import pandas as pd
 from datetime import datetime
 from currency import Currency
 from io_manager import read_json, write_json
+from transactions import Transactions
 
 
-class Cash:
+class Cash(Transactions):
     """
     Calculates the amount of available cash in the portfolio for each day.
     The currencies are handled separately
@@ -16,8 +17,8 @@ class Cash:
     -get a transaction in dict format
     -validate it (the total amount for that currency cannot be less than 0)
      -it has to be checked for the whole column!!!
-        -add the transaction to the cash_transactions_list
-    -sort cash_transactions_list by date
+        -add the transaction to the transactions_list
+    -sort transactions_list by date
     -update the database (cash_df) with the new value
     -add / update "total" column in database in the main currency (currency)
     -update exchange rates in Currency class --> _set_exchange_rates
@@ -27,9 +28,9 @@ class Cash:
 
     def __init__(self, currency="HUF", cash_df=pd.DataFrame(), tr_list=[], name=None):
         self.historical_df = cash_df
-        self.cash_transactions_list = tr_list
-        if self.cash_transactions_list:
-            for item in self.cash_transactions_list:
+        self.transactions_list = tr_list
+        if self.transactions_list:
+            for item in self.transactions_list:
                 self.historical_df = self._add_transaction_to_df(item, self.historical_df)
         self._currency = currency
         self.exchange_rates = Currency().currencies_df
@@ -41,9 +42,10 @@ class Cash:
             return
         if self._validate_transaction(tr):
             self.add_transaction_to_list(tr)
-            self._sort_transactions_list()
+            self.transactions_list = self._sort_transactions_list(
+                self.transactions_list)
             self.save_transactions_list()
-            self.historical_df = self._add_transaction_to_df(tr, self.historical_df)
+            self.historical_df = self._add_transaction_to_df(tr, self.historical_df, type="currency")
             self._set_exchange_rates(tr)
         else:
             return
@@ -87,43 +89,38 @@ class Cash:
 
     def add_transaction_to_list(self, transaction):
         # not done yet
-        self.cash_transactions_list.append(transaction)
+        self.transactions_list.append(transaction)
 
     def remove_transaction(self, transaction):
         # not done yet
-        self.cash_transactions_list.remove(transaction)
+        self.transactions_list.remove(transaction)
 
     def edit_transaction(seld, transaction):
         # not done yet
         pass
 
-    def _sort_transactions_list(self):
-        self.cash_transactions_list = sorted(
-            self.cash_transactions_list,
-            key=lambda transaction: transaction["date"])
-
     def save_transactions_list(self):
         tr_dict = read_json('files/transactions.json')
-        tr_dict[self.name]['Cash'] = self.cash_transactions_list
+        tr_dict[self.name]['Cash'] = self.transactions_list
         write_json(tr_dict, 'files/transactions.json')
 
-    def _add_transaction_to_df(self, transaction, df):
-        tr = transaction
-        if df.empty:
-            df = self._create_dataframe(tr, first_creation=True)
-            df[tr["currency"]] = tr["amount"]
-        else:
-            if tr["date"] < str(df.index[0]):
-                temp_df = self._create_dataframe(tr)
-                df = pd.concat([temp_df, df], copy=False, sort=True, axis=0)
-                df = df.fillna(0)
-            if tr["currency"] in df.keys():
-                df.loc[df.index >= tr["date"], tr['currency']] = (
-                    df[tr["currency"]] + tr['amount'])
-            else:
-                df.loc[df.index >= tr["date"], tr['currency']] = tr['amount']
-                df.fillna(0)
-        return df
+    # def _add_transaction_to_df(self, transaction, df):
+    #     tr = transaction
+    #     if df.empty:
+    #         df = self._create_dataframe(tr, first_creation=True)
+    #         df[tr["currency"]] = tr["amount"]
+    #     else:
+    #         if tr["date"] < str(df.index[0]):
+    #             temp_df = self._create_dataframe(tr)
+    #             df = pd.concat([temp_df, df], copy=False, sort=True, axis=0)
+    #             df = df.fillna(0)
+    #         if tr["currency"] in df.keys():
+    #             df.loc[df.index >= tr["date"], tr['currency']] = (
+    #                 df[tr["currency"]] + tr['amount'])
+    #         else:
+    #             df.loc[df.index >= tr["date"], tr['currency']] = tr['amount']
+    #             df.fillna(0)
+    #     return df
 
     def _create_dataframe(self, transaction, first_creation=False):
         start_date = transaction["date"]

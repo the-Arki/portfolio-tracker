@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 from pandas_datareader import data as web
 import io_manager
 import json
+from transactions import Transactions
 
 """
 to do list:
@@ -16,10 +17,10 @@ to do list:
     """
 
 
-class Stock:
+class Stock(Transactions):
     """
     """
-    stock_value_df = pd.DataFrame()  # it has to be loaded from file
+    stock_value_df = pd.DataFrame()
     today = datetime.date(datetime.now())
 
     def __init__(self, currency="HUF", stock_df=pd.DataFrame(), tr_list=[], name=None):
@@ -36,7 +37,8 @@ class Stock:
         pass
 
     def sell_equity(self, ticker, quantity, price, fee, currency):
-        """Return the transaction in dictionary form.
+        """ Check if the quantity of the ticker in the portfolio is >= quantity.
+        if so, then return the transaction in dictionary form.
         e.g. return {'ticker': 'MSFT', 'date': '2022-02-02', 'quantity': 6, 'price': 120, 'fee': 2, 'currency': 'USD'} """
         pass
 
@@ -58,7 +60,6 @@ class StockPrice:
 
     @classmethod
     def check_ticker(cls, ticker):
-        print(cls.stock_list)
         if ticker not in cls.stock_list:
             cls.add_to_list(ticker)
             cls.stock_price_df[ticker] = cls.add_stock_price(ticker)
@@ -73,8 +74,7 @@ class StockPrice:
     def save_list(cls, stickers_list):
         data = {}
         data['stickers_list'] = stickers_list
-        io_manager.write_json(data, 'files/stock_prices_list.json')
-        
+        io_manager.write_json(data, 'files/stock_prices_list.json')   
 
     @classmethod
     def add_stock_price(cls, ticker):
