@@ -6,6 +6,7 @@ from pandas_datareader import data as web
 import io_manager
 import json
 from transactions import Transactions
+import yfinance as yf
 
 """
 to do list:
@@ -60,14 +61,19 @@ class StockPrice:
 
     @classmethod
     def check_ticker(cls, ticker):
-        if ticker not in cls.stock_list:
-            cls.add_to_list(ticker)
+        if ticker not in [key for d in cls.stock_list for key in d.keys()]:
+            currency = cls.get_ticker_currency(ticker)
+            cls.add_to_list(ticker, currency)
             cls.stock_price_df[ticker] = cls.add_stock_price(ticker)
             cls.save_df(cls.stock_price_df)
 
     @classmethod
-    def add_to_list(cls, ticker):
-        cls.stock_list.append(ticker)
+    def get_ticker_currency(cls, ticker):
+        return yf.Ticker(ticker).info['currency']
+
+    @classmethod
+    def add_to_list(cls, ticker, currency):
+        cls.stock_list.append({ticker: currency})
         cls.save_list(cls.stock_list)
 
     @classmethod
@@ -86,9 +92,13 @@ class StockPrice:
     def save_df(cls, df):
         df.to_csv('files/stock_prices.csv')
 
+    @classmethod
+    def get_data(cls, ticker):
+        d = web.get_data_yahoo_actions(ticker)
+        return d
 
 ###################################################################
 if __name__ == "__main__":
-    StockPrice.check_ticker('TSLA')
+    StockPrice.check_ticker('OTP.BD')
     print(StockPrice.stock_list)
     print(StockPrice.stock_price_df)
