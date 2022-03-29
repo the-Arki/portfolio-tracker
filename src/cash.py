@@ -122,16 +122,16 @@ class Cash(Transactions):
     #             df.fillna(0)
     #     return df
 
-    def _create_dataframe(self, transaction, first_creation=False):
-        start_date = transaction["date"]
-        if first_creation:
-            end_date = datetime.date(datetime.now())
-        else:
-            end_date = self.historical_df.index[0] - pd.Timedelta(days=1)
-        dates = pd.date_range(start=start_date, end=end_date, freq="D")
-        df = pd.DataFrame(
-            {transaction["currency"]: 0}, index=dates)
-        return df
+    # def _create_dataframe(self, transaction, first_creation=False):
+    #     start_date = transaction["date"]
+    #     if first_creation:
+    #         end_date = self.today
+    #     else:
+    #         end_date = self.historical_df.index[0] - pd.Timedelta(days=1)
+    #     dates = pd.date_range(start=start_date, end=end_date, freq="D")
+    #     df = pd.DataFrame(
+    #         {transaction["currency"]: 0}, index=dates)
+    #     return df
 
     def _set_exchange_rates(self, transaction):
         Currency().set_exchange_rates(transaction["currency"],

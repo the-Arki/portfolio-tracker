@@ -11,10 +11,9 @@ import requests
 
 """
 to do list:
-    save stock price df to file
-    load data from this file at init
     buy equity
     sell equity
+    by buy and sell the amount has to be subtracted from cash class!!!
     update stock price
     """
 
@@ -22,15 +21,18 @@ to do list:
 class Stock(Transactions):
     """
     """
-    stock_value_df = pd.DataFrame()
     today = datetime.date(datetime.now())
 
     def __init__(self, currency="HUF", stock_df=pd.DataFrame(), tr_list=[], name=None):
         self.historical_df = stock_df
         self.transactions_list = tr_list
+        if self.transactions_list:
+            for item in self.transactions_list:
+                self.historical_df = self._add_transaction_to_df(item, self.historical_df, name="ticker")
         self._currency = currency
         self.exchange_rates = Currency().currencies_df
         self.name = name
+        self.stock_value_df = pd.DataFrame()
 
     def buy_equity(self, date, ticker, quantity, price, fee, currency, avaliable_cash):
         """check if there is enough free cash in the portfolio.
@@ -94,11 +96,8 @@ class StockPrice:
         start_date = cls.today - relativedelta(years=10)
         series = web.DataReader(ticker, data_source='yahoo', start=start_date, end=cls.today)['Adj Close']
         df = pd.DataFrame(series)
-        # df.convert_dtypes(infer_objects=True)
-        print('infochka\n', df.info())
         df.columns = pd.MultiIndex.from_tuples([(ticker, currency)], names=['ticker', 'currency'])
         df = df.loc[~df.index.duplicated()]
-        print('duplicated?\n', df.index.has_duplicates)
         df = df.dropna()
         return df
 
