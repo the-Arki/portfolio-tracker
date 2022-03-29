@@ -1,3 +1,4 @@
+from pickletools import float8
 import pandas as pd
 from currency import Currency
 from datetime import datetime
@@ -6,7 +7,7 @@ from pandas_datareader import data as web
 import io_manager
 import json
 from transactions import Transactions
-import yfinance as yf
+import requests
 
 """
 to do list:
@@ -49,7 +50,9 @@ class StockPrice:
     """
     try:
         stock_price_df = pd.read_csv('files/stock_prices.csv',
-                                     parse_dates=True, index_col=[0])
+                                     parse_dates=True, header=[0, 1], index_col=[0],
+                                     skipinitialspace=True)
+        stock_price_df.convert_dtypes(infer_objects=True)
     except (pd.errors.EmptyDataError, FileNotFoundError):
         stock_price_df = pd.DataFrame()
     try:
@@ -64,12 +67,16 @@ class StockPrice:
         if ticker not in [key for d in cls.stock_list for key in d.keys()]:
             currency = cls.get_ticker_currency(ticker)
             cls.add_to_list(ticker, currency)
-            cls.stock_price_df[ticker] = cls.add_stock_price(ticker)
+            cls.stock_price_df = pd.concat([cls.stock_price_df, cls.add_stock_price(ticker, currency)], axis=1)
             cls.save_df(cls.stock_price_df)
 
     @classmethod
     def get_ticker_currency(cls, ticker):
-        return yf.Ticker(ticker).info['currency']
+        url = 'https://query2.finance.yahoo.com/v7/finance/options/{}'.format(ticker)
+        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}).json()
+        info = response['optionChain']['result'][0]['quote']
+        currency = info['currency']
+        return currency
 
     @classmethod
     def add_to_list(cls, ticker, currency):
@@ -83,9 +90,16 @@ class StockPrice:
         io_manager.write_json(data, 'files/stock_prices_list.json')   
 
     @classmethod
-    def add_stock_price(cls, ticker):
-        start_date = cls.today + relativedelta(years=-10)
-        df = web.DataReader(ticker, data_source='yahoo', start=start_date, end=cls.today)['Adj Close']
+    def add_stock_price(cls, ticker, currency):
+        start_date = cls.today - relativedelta(years=10)
+        series = web.DataReader(ticker, data_source='yahoo', start=start_date, end=cls.today)['Adj Close']
+        df = pd.DataFrame(series)
+        # df.convert_dtypes(infer_objects=True)
+        print('infochka\n', df.info())
+        df.columns = pd.MultiIndex.from_tuples([(ticker, currency)], names=['ticker', 'currency'])
+        df = df.loc[~df.index.duplicated()]
+        print('duplicated?\n', df.index.has_duplicates)
+        df = df.dropna()
         return df
 
     @classmethod
@@ -99,6 +113,7 @@ class StockPrice:
 
 ###################################################################
 if __name__ == "__main__":
-    StockPrice.check_ticker('OTP.BD')
+    StockPrice.check_ticker('TSLA')
+    StockPrice.check_ticker('MSFT')
     print(StockPrice.stock_list)
     print(StockPrice.stock_price_df)
