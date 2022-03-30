@@ -31,7 +31,8 @@ class Cash(Transactions):
         self.transactions_list = tr_list
         if self.transactions_list:
             for item in self.transactions_list:
-                self.historical_df = self._add_transaction_to_df(item, self.historical_df)
+                self.historical_df = self._add_transaction_to_df(
+                    item, self.historical_df)
         self._currency = currency
         self.exchange_rates = Currency().currencies_df
         self.name = name
@@ -41,11 +42,11 @@ class Cash(Transactions):
         if not tr:
             return
         if self._validate_transaction(tr):
-            self.add_transaction_to_list(tr)
-            self.transactions_list = self._sort_transactions_list(
-                self.transactions_list)
+            self.transactions_list = self.add_transaction_to_list(
+                tr, self.transactions_list)
             self.save_transactions_list()
-            self.historical_df = self._add_transaction_to_df(tr, self.historical_df, type="currency")
+            self.historical_df = self._add_transaction_to_df(
+                tr, self.historical_df, type="currency")
             self._set_exchange_rates(tr)
         else:
             return
@@ -87,9 +88,9 @@ class Cash(Transactions):
                         print(("TypeError - The answer {} is incorrect."
                                .format(decision)))
 
-    def add_transaction_to_list(self, transaction):
-        # not done yet
-        self.transactions_list.append(transaction)
+    # def add_transaction_to_list(self, transaction):
+    #     # not done yet
+    #     self.transactions_list.append(transaction)
 
     def remove_transaction(self, transaction):
         # not done yet
@@ -99,10 +100,10 @@ class Cash(Transactions):
         # not done yet
         pass
 
-    def save_transactions_list(self):
-        tr_dict = read_json('files/transactions.json')
-        tr_dict[self.name]['Cash'] = self.transactions_list
-        write_json(tr_dict, 'files/transactions.json')
+    # def save_transactions_list(self):
+    #     tr_dict = read_json('files/transactions.json')
+    #     tr_dict[self.name]['Cash'] = self.transactions_list
+    #     write_json(tr_dict, 'files/transactions.json')
 
     # def _add_transaction_to_df(self, transaction, df):
     #     tr = transaction

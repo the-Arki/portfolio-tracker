@@ -24,27 +24,47 @@ class Stock(Transactions):
     today = datetime.date(datetime.now())
 
     def __init__(self, currency="HUF", stock_df=pd.DataFrame(), tr_list=[], name=None):
+        self.name = name
         self.historical_df = stock_df
         self.transactions_list = tr_list
         if self.transactions_list:
             for item in self.transactions_list:
                 self.historical_df = self._add_transaction_to_df(item, self.historical_df, name="ticker")
+        print(self.name, 'test stock df!!!!!!!!!!!!!!!!\n', self.historical_df)
         self._currency = currency
         self.exchange_rates = Currency().currencies_df
-        self.name = name
         self.stock_value_df = pd.DataFrame()
 
-    def buy_equity(self, date, ticker, quantity, price, fee, currency, avaliable_cash):
+    def buy(self, date, ticker, quantity, unit_price, fee, currency, avaliable_cash):
         """check if there is enough free cash in the portfolio.
         If so, then return the transaction in dictionary form.
         e.g. return {'ticker': 'MSFT', 'date': '2022-02-02', 'quantity': 6, 'price': 120, 'fee': 2, 'currency': 'USD'} """
-        pass
+        if quantity * unit_price + fee > avaliable_cash:
+            print("There is not enough cash available for this transaction.")
+            return
+        self.handle_transaction(date, ticker, quantity, unit_price, fee, currency, type="buy")
 
-    def sell_equity(self, ticker, quantity, price, fee, currency):
+    def sell(self, date, ticker, quantity, unit_price, fee, currency, type="sell"):
         """ Check if the quantity of the ticker in the portfolio is >= quantity.
         if so, then return the transaction in dictionary form.
         e.g. return {'ticker': 'MSFT', 'date': '2022-02-02', 'quantity': 6, 'price': 120, 'fee': 2, 'currency': 'USD'} """
-        pass
+        self.handle_transaction(date, ticker, quantity, unit_price, fee, currency, type="sell")
+
+    def handle_transaction(self, date, ticker, quantity, unit_price, fee, currency, type=None):
+        tr = {"date": date, "ticker": ticker, "quantity": quantity,
+              "unit_price": unit_price, "fee": fee, "type": type, "currency": currency,}
+        self.transactions_list = self.add_transaction_to_list(
+                tr, self.transactions_list)
+        self.save_transactions_list()
+        # self._add_transaction_to_df
+        # StockPrice.check_ticker
+        # return transaction that can be passed to cash class
+        
+        
+        # example
+        total_price = unit_price * quantity + fee
+        transaction = {"date": date, "type": type, "currency": currency, "amount": total_price}
+        return transaction
 
 
 class StockPrice:
@@ -114,5 +134,7 @@ class StockPrice:
 if __name__ == "__main__":
     StockPrice.check_ticker('TSLA')
     StockPrice.check_ticker('MSFT')
-    print(StockPrice.stock_list)
-    print(StockPrice.stock_price_df)
+    # print(StockPrice.stock_list)
+    # print(StockPrice.stock_price_df)
+    x = Stock(name="birka")
+    x.buy("2022-02-22", "MSFT", 10, 305, 2, "USD", 20000)

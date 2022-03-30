@@ -1,10 +1,20 @@
 import pandas as pd
 from datetime import datetime
-
+from io_manager import read_json, write_json
 
 class Transactions:
     """
     """
+    def add_transaction_to_list(self, transaction, tr_list):
+        tr_list.append(transaction)
+        sorted_list = sorted(tr_list, key=lambda transaction: transaction["date"])
+        return sorted_list
+
+    def save_transactions_list(self):
+        tr_dict = read_json('files/transactions.json')
+        tr_dict[self.name][self.__class__.__name__] = self.transactions_list
+        write_json(tr_dict, 'files/transactions.json')
+
     def _add_transaction_to_df(self, transaction, df, name="currency"):
         """example_transaction = {
             "date": "2022-03-21",
@@ -14,11 +24,11 @@ class Transactions:
            """
         tr = transaction
         if df.empty:
-            df = self._create_dataframe(tr, first_creation=True)
+            df = self._create_dataframe(tr, name=name, first_creation=True)
             df[tr[name]] = tr["amount"]
         else:
             if tr["date"] < str(df.index[0]):
-                temp_df = self._create_dataframe(tr)
+                temp_df = self._create_dataframe(tr, name=name)
                 df = pd.concat([temp_df, df], copy=False, sort=True, axis=0)
                 df = df.fillna(0)
             if tr[name] in df.keys():
@@ -29,7 +39,7 @@ class Transactions:
                 df.fillna(0)
         return df
 
-    def _create_dataframe(self, transaction, first_creation=False):
+    def _create_dataframe(self, transaction, name="currency", first_creation=False):
         start_date = transaction["date"]
         if first_creation:
             end_date = self.today
@@ -37,7 +47,7 @@ class Transactions:
             end_date = self.historical_df.index[0] - pd.Timedelta(days=1)
         dates = pd.date_range(start=start_date, end=end_date, freq="D")
         df = pd.DataFrame(
-            {transaction["currency"]: 0}, index=dates)
+            {transaction[name]: 0}, index=dates)
         return df
 
     def _sort_transactions_list(self, tr_list):
