@@ -27,6 +27,7 @@ class Cash(Transactions):
     today = datetime.date(datetime.now())
 
     def __init__(self, currency="HUF", cash_df=pd.DataFrame(), tr_list=[], name=None):
+        super().__init__()
         self.historical_df = cash_df
         self.transactions_list = tr_list
         if self.transactions_list:
@@ -46,7 +47,7 @@ class Cash(Transactions):
                 tr, self.transactions_list)
             self.save_transactions_list()
             self.historical_df = self._add_transaction_to_df(
-                tr, self.historical_df, type="currency")
+                tr, self.historical_df)
             self._set_exchange_rates(tr)
         else:
             return

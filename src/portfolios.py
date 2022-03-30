@@ -83,22 +83,22 @@ if __name__ == "__main__":
     # io_manager.write_json(lista, 'files/portfolio_names.json')
     x = Portfolios()
     print(x.instances)
-    # x.create_instance('birka')
+    x.create_instance('birka')
     # print(x.instances)
     # x.delete_instance('kakas')
     # print(x.instances)
     # x.delete_instance('kakas')
     def handle_tr(name, transaction):
         x.instances[name].cash.handle_transaction(transaction)
-        return x.instances[name].cash.cash_transactions_list
+        return x.instances[name].cash.transactions_list
     # x.instances['birka'].cash.handle_transaction(tr1)
     def get_tot_value(name):
         total_value = x.instances[name].cash.get_total_value(in_base_currency=False)
         return total_value
     # ####################
-    # handle_tr('birka', tr1)
-    tot1 = get_tot_value('kukorica')
-    print(tot1)
+    handle_tr('birka', tr1)
+    # tot1 = get_tot_value('kukorica')
+    # print(tot1)
     print('na ez most portfolio total')
     print(x.instances['birka'].name)
     print(x.calculate_total_value())
@@ -110,5 +110,5 @@ if __name__ == "__main__":
     # print("ez a tot2: ", tot2)
     # print(x.instances['kukorica'].exchange_rates.currencies_df)
     # print('név: ', x.instances["kukorica"].name)
-    print(x.instances['kukorica'].transactions_dict)
+    # print(x.instances['kukorica'].transactions_dict)
     
