@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 # Folder where the created files are stored
-files/
+files/*
 
 # Test file
 scr/temporary_to_delete.py
