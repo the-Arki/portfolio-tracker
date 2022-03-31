@@ -75,7 +75,7 @@ class Cash(Transactions):
             if (not self.historical_df.empty and
                 tr["currency"] in self.historical_df.columns and
                 (tr["amount"] +
-                 (min(self.historical_df[tr["currency"]].values)) >= 0)):
+                 (min(self.historical_df.loc[self.historical_df.index >= tr["date"], tr["currency"]])) >= 0)):
                 return True
             else:
                 print("Not enough cash available for this transaction.")
@@ -160,7 +160,6 @@ class Cash(Transactions):
         df = df.dropna(how='all')
         df['Total_base'] = df.sum(axis=1)
         df['Total'] = df['Total_base'].div(self.exchange_rates[self._currency])
-        # self.historical_df['Total'] = df['Total']
         self.total_base_currency = pd.Series(df['Total_base'])
         if in_base_currency:
             return self.total_base_currency
@@ -173,12 +172,12 @@ if __name__ == "__main__":
     tr1 = {"date": "2022-03-21", "type": 'Cash-In',
            "currency": "HUF", "amount": 10}
     tr2 = {"date": "2022-03-22", "type": 'Cash-In',
-           "currency": "HUF", "amount": 10}
+           "currency": "HUF", "amount": 100}
     tr3 = {"date": "2022-03-15", "type": 'Cash-In',
            "currency": "USD", "amount": 10}
-    tr4 = {"date": "2022-03-11", "type": 'Cash-In',
-           "currency": "HUF", "amount": 1}
-    pesto = Cash()
+    tr4 = {"date": "2022-03-23", "type": 'Withdraw',
+           "currency": "HUF", "amount": 100}
+    pesto = Cash(name='birka')
 
     def test(tr):
         pesto.handle_transaction(tr)

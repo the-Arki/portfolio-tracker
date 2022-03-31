@@ -21,7 +21,7 @@ class Transactions:
     def _add_transaction_to_df(self, transaction, df):
         """example_transaction = {
             "date": "2022-03-21",
-            "type": 'sell',
+            "type": 'Sell',
             "currency": "HUF",
             "amount": 10}
            """

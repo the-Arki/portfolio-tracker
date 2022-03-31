@@ -4,7 +4,7 @@ from bond import Bond
 from cash import Cash
 from currency import Currency
 from portfolio import Portfolio
-from stock import Stock
+from stock import Stock, StockPrice
 import io_manager
 import json
 
@@ -57,6 +57,23 @@ class Portfolios:
         # get the sum values of instances by type (stock, bond, cash)
         pass
 
+    def buy_equity(self, name, date, ticker, amount, unit_price, fee, currency):
+        total_amount = amount * unit_price + fee
+        tr = {"date": date, "currency": currency, "amount": total_amount}
+        if self.instances[name].cash._validate_transaction(tr):
+            transaction = self.instances[name].stock.buy(date, ticker, amount, unit_price, fee, currency)
+            if transaction:
+                self.instances[name].cash.handle_transaction(transaction)
+        else:
+            print("There is not enough cash available for this transaction.")
+
+
+
+
+
+
+
+#########  ez jön most
     def calculate_total_value(self):
         """get the total values of the portfolios in base currency
         and return the sum of the total values in main currency."""
@@ -102,7 +119,10 @@ if __name__ == "__main__":
     print('na ez most portfolio total')
     print(x.instances['birka'].name)
     print(x.calculate_total_value())
-    # x.create_instance('kukorica')
+    x.create_instance('kukorica')
+    # "kukorica", "2022-03-23", "MSFT", 1, 300, 2, "USD"
+    x.buy_equity("birka", "2022-03-23", "MSFT", 1, 300, 2, "HUF")
+    x.buy_equity("birka", "2022-03-21", "TSLA", 1, 33, 2, "HUF")
     # handle_tr('birka', tr2)
     # print(handle_tr('birka', tr3))
     # handle_tr('kukorica', tr4)

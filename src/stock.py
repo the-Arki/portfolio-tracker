@@ -11,7 +11,6 @@ import requests
 
 """
 to do list:
-    buy equity
     sell equity
     by buy and sell the amount has to be subtracted from cash class!!!
     update stock price
@@ -36,18 +35,17 @@ class Stock(Transactions):
         self.exchange_rates = Currency().currencies_df
         self.stock_value_df = pd.DataFrame()
 
-    def buy(self, date, ticker, amount, unit_price, fee, currency, avaliable_cash):
+    def buy(self, date, ticker, amount, unit_price, fee, currency):
         """check if there is enough free cash in the portfolio.
         If so, then return the transaction in dictionary form.
         e.g. return {'ticker': 'MSFT', 'date': '2022-02-02', 'quantity': 6, 'price': 120, 'fee': 2, 'currency': 'USD'} """
-        if amount * unit_price + fee > avaliable_cash:
-            print("There is not enough cash available for this transaction.")
-            return
         try:
             StockPrice.check_ticker(ticker)
         except (KeyError, IndexError):
             print('This ticker is not in our database')
-        self.handle_transaction(date, ticker, amount, unit_price, fee, currency, type="Buy")
+            return None
+        tr = self.handle_transaction(date, ticker, amount, unit_price, fee, currency, type="Buy")
+        return tr
 
     def sell(self, date, ticker, amount, unit_price, fee, currency):
         """ Check if the quantity of the ticker in the portfolio is >= quantity.
@@ -62,14 +60,38 @@ class Stock(Transactions):
                 tr, self.transactions_list)
         self.save_transactions_list()
         self.historical_df = self._add_transaction_to_df(tr, self.historical_df)
-        print('ez a stock df\n', self.historical_df)
-        # return transaction that can be passed to cash class
-
-
-        # example
+        self.calculate_stock_value(ticker)
         total_price = unit_price * amount + fee
-        transaction = {"date": date, "type": type, "currency": currency, "amount": total_price}
-        return transaction
+        transaction = {"date": date, "type": type, "currency": currency, "amount": total_price, "ticker": ticker}
+        return transaction  # pass the returned transaction to cash class
+
+    def calculate_stock_value(self, ticker):
+        price_df = StockPrice.check_ticker(ticker).copy()
+        price_df.columns = price_df.columns.get_level_values('ticker')
+        self.stock_value_df[ticker] = self.historical_df[ticker] * price_df[ticker]
+        return self.stock_value_df
+
+
+
+
+
+
+
+
+
+# ez jön most
+    def get_total_value(self, in_base_currency=True):
+        """
+        """
+        df = self.stock_value_df
+        df = df.dropna(how='all')
+        df['Total_base'] = df.sum(axis=1)
+        df['Total'] = df['Total_base'].div(self.exchange_rates[self._currency])
+        self.total_base_currency = pd.Series(df['Total_base'])
+        if in_base_currency:
+            return self.total_base_currency
+        self.total_actual_currency = pd.Series(df['Total'])
+        return self.total_actual_currency
 
 
 class StockPrice:
@@ -96,6 +118,7 @@ class StockPrice:
             cls.add_to_list(ticker, currency)
             cls.stock_price_df = pd.concat([cls.stock_price_df, cls.add_stock_price(ticker, currency)], axis=1)
             cls.save_df(cls.stock_price_df)
+        return cls.stock_price_df
 
     @classmethod
     def get_ticker_currency(cls, ticker):
@@ -146,4 +169,4 @@ if __name__ == "__main__":
     # print(StockPrice.stock_list)
     # print(StockPrice.stock_price_df)
     x = Stock(name="birka")
-    x.buy("2022-02-22", "MSFT", 10, 305, 2, "USD", 20000)
+    x.buy("2022-02-22", "MSFT", 10, 305, 2, "USD")
