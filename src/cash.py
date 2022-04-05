@@ -1,8 +1,8 @@
 import pandas as pd
 from datetime import datetime
-from currency import Currency
-from io_manager import read_json, write_json
-from transactions import Transactions
+from src.currency import Currency
+from src.io_manager import read_json, write_json
+from src.transactions import Transactions
 
 
 class Cash(Transactions):
