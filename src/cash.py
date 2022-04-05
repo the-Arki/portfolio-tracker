@@ -67,7 +67,6 @@ class Cash(Transactions):
         return transaction_
 
     def _validate_transaction(self, transaction):
-        # this method should be changed
         tr = transaction
         if tr["amount"] >= 0:
             return True
@@ -89,10 +88,6 @@ class Cash(Transactions):
                         print(("TypeError - The answer {} is incorrect."
                                .format(decision)))
 
-    # def add_transaction_to_list(self, transaction):
-    #     # not done yet
-    #     self.transactions_list.append(transaction)
-
     def remove_transaction(self, transaction):
         # not done yet
         self.transactions_list.remove(transaction)
@@ -101,54 +96,14 @@ class Cash(Transactions):
         # not done yet
         pass
 
-    # def save_transactions_list(self):
-    #     tr_dict = read_json('files/transactions.json')
-    #     tr_dict[self.name]['Cash'] = self.transactions_list
-    #     write_json(tr_dict, 'files/transactions.json')
-
-    # def _add_transaction_to_df(self, transaction, df):
-    #     tr = transaction
-    #     if df.empty:
-    #         df = self._create_dataframe(tr, first_creation=True)
-    #         df[tr["currency"]] = tr["amount"]
-    #     else:
-    #         if tr["date"] < str(df.index[0]):
-    #             temp_df = self._create_dataframe(tr)
-    #             df = pd.concat([temp_df, df], copy=False, sort=True, axis=0)
-    #             df = df.fillna(0)
-    #         if tr["currency"] in df.keys():
-    #             df.loc[df.index >= tr["date"], tr['currency']] = (
-    #                 df[tr["currency"]] + tr['amount'])
-    #         else:
-    #             df.loc[df.index >= tr["date"], tr['currency']] = tr['amount']
-    #             df.fillna(0)
-    #     return df
-
-    # def _create_dataframe(self, transaction, first_creation=False):
-    #     start_date = transaction["date"]
-    #     if first_creation:
-    #         end_date = self.today
-    #     else:
-    #         end_date = self.historical_df.index[0] - pd.Timedelta(days=1)
-    #     dates = pd.date_range(start=start_date, end=end_date, freq="D")
-    #     df = pd.DataFrame(
-    #         {transaction["currency"]: 0}, index=dates)
-    #     return df
-
     def _set_exchange_rates(self, transaction):
         Currency().set_exchange_rates(transaction["currency"],
                                       transaction["date"])
-
-    # def update_exchange_rates(self):
-    #     end_date = self.today
-    #     start_date = Currency().currencies_df.index[-1]
-    #     if start_date
 
     def update_historical_df(self, df):
         end_date = self.today
         if df.index[-1] < end_date:
             df = df.ffill()
-            
         return df
 
     def get_total_value(self, in_base_currency=True):
@@ -165,27 +120,3 @@ class Cash(Transactions):
             return self.total_base_currency
         self.total_actual_currency = pd.Series(df['Total'])
         return self.total_actual_currency
-
-
-# -------------------------------------------------------------
-if __name__ == "__main__":
-    tr1 = {"date": "2022-03-21", "type": 'Cash-In',
-           "currency": "HUF", "amount": 10}
-    tr2 = {"date": "2022-03-22", "type": 'Cash-In',
-           "currency": "HUF", "amount": 100}
-    tr3 = {"date": "2022-03-15", "type": 'Cash-In',
-           "currency": "USD", "amount": 10}
-    tr4 = {"date": "2022-03-23", "type": 'Withdraw',
-           "currency": "HUF", "amount": 100}
-    pesto = Cash(name='birka')
-
-    def test(tr):
-        pesto.handle_transaction(tr)
-    test(tr1)
-    test(tr2)
-    test(tr3)
-    test(tr4)
-    print("df at the end: ", pesto.historical_df)
-    test_df = pesto.exchange_rates
-    x = pesto.get_total_value(in_base_currency=False)
-    print("yooooooooooooooooooooooooooo\n", x)

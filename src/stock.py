@@ -1,4 +1,3 @@
-from pickletools import float8
 import pandas as pd
 from currency import Currency
 from datetime import datetime
@@ -22,18 +21,18 @@ class Stock(Transactions):
     """
     today = datetime.date(datetime.now())
 
-    def __init__(self, currency="HUF", stock_df=pd.DataFrame(), tr_list=[], name=None, type="ticker"):
+    def __init__(self, currency="HUF", tr_list=[], name=None, type="ticker"):
         super().__init__(type)
         self.name = name
-        self.historical_df = stock_df
+        self.historical_df = pd.DataFrame()
+        self.stock_value_df = pd.DataFrame()
         self.transactions_list = tr_list
         if self.transactions_list:
             for item in self.transactions_list:
                 self.historical_df = self._add_transaction_to_df(item, self.historical_df)
-        print(self.name, 'test stock df!!!!!!!!!!!!!!!!\n', self.historical_df)
+            self.stock_value_df = self.calculate_stock_value(self.historical_df)
         self._currency = currency
         self.exchange_rates = Currency().currencies_df
-        self.stock_value_df = pd.DataFrame()
 
     def buy(self, date, ticker, amount, unit_price, fee, currency):
         """check if there is enough free cash in the portfolio.
@@ -60,37 +59,35 @@ class Stock(Transactions):
                 tr, self.transactions_list)
         self.save_transactions_list()
         self.historical_df = self._add_transaction_to_df(tr, self.historical_df)
-        self.calculate_stock_value(ticker)
+        self.stock_value_df = self.calculate_stock_value(self.historical_df)
         total_price = unit_price * amount + fee
         transaction = {"date": date, "type": type, "currency": currency, "amount": total_price, "ticker": ticker}
         return transaction  # pass the returned transaction to cash class
 
-    def calculate_stock_value(self, ticker):
-        price_df = StockPrice.check_ticker(ticker).copy()
-        price_df.columns = price_df.columns.get_level_values('ticker')
-        self.stock_value_df[ticker] = self.historical_df[ticker] * price_df[ticker]
-        return self.stock_value_df
+    def calculate_stock_value(self, qty_df):
+        df_raw = qty_df * StockPrice.stock_price_df[qty_df.columns]
+        df_raw = df_raw.dropna(how='all')
+        return df_raw
 
-
-
-
-
-
-
-
-
-# ez jön most
     def get_total_value(self, in_base_currency=True):
         """
         """
-        df = self.stock_value_df
-        df = df.dropna(how='all')
-        df['Total_base'] = df.sum(axis=1)
-        df['Total'] = df['Total_base'].div(self.exchange_rates[self._currency])
-        self.total_base_currency = pd.Series(df['Total_base'])
+        if self.stock_value_df.empty:
+            return None
+        df = self.stock_value_df.copy()
+        cols = []
+        for i in df.columns:
+            for item in StockPrice.stock_list:
+                if item[0] == i:
+                    cols.append(item[1])
+        df_cur = df
+        df_cur.columns = cols
+        df_base = df_cur * self.exchange_rates[df_cur.columns]
+        self.total_base_currency = df_base.sum(axis=1)
+        self.total_actual_currency = self.total_base_currency.div(self.exchange_rates[self._currency])
+        self.total_actual_currency.name = self._currency
         if in_base_currency:
             return self.total_base_currency
-        self.total_actual_currency = pd.Series(df['Total'])
         return self.total_actual_currency
 
 
@@ -99,25 +96,28 @@ class StockPrice:
     """
     try:
         stock_price_df = pd.read_csv('files/stock_prices.csv',
-                                     parse_dates=True, header=[0, 1], index_col=[0],
+                                     parse_dates=True, header=[0], index_col=[0],
                                      skipinitialspace=True)
         stock_price_df.convert_dtypes(infer_objects=True)
+        
     except (pd.errors.EmptyDataError, FileNotFoundError):
         stock_price_df = pd.DataFrame()
     try:
         stock_dict = io_manager.read_json('files/stock_prices_list.json')
-        stock_list = stock_dict['stickers_list']
+        stock_list = [tuple(item) for item in stock_dict['tickers_list']]
     except (json.decoder.JSONDecodeError, FileNotFoundError):
         stock_list = []
     today = datetime.date(datetime.now())
 
     @classmethod
     def check_ticker(cls, ticker):
-        if ticker not in [key for d in cls.stock_list for key in d.keys()]:
+        if ticker not in [item[0] for item in cls.stock_list]:
             currency = cls.get_ticker_currency(ticker)
             cls.add_to_list(ticker, currency)
-            cls.stock_price_df = pd.concat([cls.stock_price_df, cls.add_stock_price(ticker, currency)], axis=1)
+            cls.stock_price_df = pd.concat([cls.stock_price_df, cls.add_stock_price(ticker)], axis=1)
             cls.save_df(cls.stock_price_df)
+        else:
+            print('{} is already in db'.format(ticker))
         return cls.stock_price_df
 
     @classmethod
@@ -130,21 +130,21 @@ class StockPrice:
 
     @classmethod
     def add_to_list(cls, ticker, currency):
-        cls.stock_list.append({ticker: currency})
+        cls.stock_list.append((ticker, currency))
         cls.save_list(cls.stock_list)
 
     @classmethod
-    def save_list(cls, stickers_list):
+    def save_list(cls, tickers_list):
         data = {}
-        data['stickers_list'] = stickers_list
+        data['tickers_list'] = tickers_list
         io_manager.write_json(data, 'files/stock_prices_list.json')   
 
     @classmethod
-    def add_stock_price(cls, ticker, currency):
+    def add_stock_price(cls, ticker):
         start_date = cls.today - relativedelta(years=10)
         series = web.DataReader(ticker, data_source='yahoo', start=start_date, end=cls.today)['Adj Close']
-        df = pd.DataFrame(series)
-        df.columns = pd.MultiIndex.from_tuples([(ticker, currency)], names=['ticker', 'currency'])
+        df = pd.DataFrame()
+        df[ticker] = series
         df = df.loc[~df.index.duplicated()]
         df = df.dropna()
         return df
@@ -157,16 +157,3 @@ class StockPrice:
     def get_data(cls, ticker):
         d = web.get_data_yahoo_actions(ticker)
         return d
-
-###################################################################
-if __name__ == "__main__":
-    StockPrice.check_ticker('TSLA')
-    StockPrice.check_ticker('MSFT')
-    try:
-        StockPrice.check_ticker('kukorica')
-    except (KeyError, IndexError):
-        print('This ticker is not in our database')
-    # print(StockPrice.stock_list)
-    # print(StockPrice.stock_price_df)
-    x = Stock(name="birka")
-    x.buy("2022-02-22", "MSFT", 10, 305, 2, "USD")

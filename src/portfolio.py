@@ -32,15 +32,19 @@ class Portfolio:
         return tr_dict
 
     def get_total_value(self, in_base_currency=True):
-        base = in_base_currency
         items_list = [self.bond, self.cash, self.stock]
         df = pd.DataFrame()
         for item in items_list:
             if not item.historical_df.empty:
-                df[item.__class__.__name__] = item.get_total_value(in_base_currency=base)
+                df[item.__class__.__name__] = item.get_total_value()
                 df.append(df[item.__class__.__name__])
         total = df.sum(axis=1)
-        return total
+        if in_base_currency:
+            return total
+        else:
+            total_actual_currency = total.div(self.exchange_rates[self.currency])
+            total_actual_currency.name = self.currency
+            return total_actual_currency
 
     def set_currency(self, currency):
         """set the currency for all the instances (bond, cash, stock),
@@ -51,28 +55,3 @@ class Portfolio:
             obj._currency = currency
         self.exchange_rates.set_exchange_rates(currency, self.today)
         return currency
-
-
-# ------------------------------------------------------
-if __name__ == "__main__":
-    tr1 = {"date": "2021-01-01", "type": 'Cash-In',
-           "currency": "EUR", "amount": 1000}
-    tr2 = {"date": "2020-01-01", "type": 'Cash-In',
-           "currency": "HUF", "amount": 10000}
-    x = Portfolio()
-    # print(Currency().currencies_df)
-    x.cash.handle_transaction(tr1)
-    # print(Currency().currencies_df)
-    exch_df = Currency().currencies_df
-    x.cash.get_total_value(exch_df)
-    x.set_currency("EUR")
-    x.cash.handle_transaction(tr2)
-    exch_df = Currency().currencies_df
-    x.cash.get_total_value(exch_df)
-    print('ez az exchange db....................\n', Currency().currencies_df)
-    x.get_total_value()
-    print('---------------now with japanese yen-----------------------------')
-    x.set_currency("JPY")
-    x.cash.get_total_value(Currency().currencies_df)
-    # print("just for fun\n", Currency().currencies_df)
-    print(x.get_total_value())

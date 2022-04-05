@@ -2,6 +2,7 @@ import pandas as pd
 from datetime import datetime
 from io_manager import read_json, write_json
 
+
 class Transactions:
     """
     """

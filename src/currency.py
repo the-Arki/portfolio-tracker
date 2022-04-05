@@ -82,7 +82,6 @@ class Currency:
         if not df.equals(cls.currencies_df):
             cls._change_df_in_class(df)
             cls.save_df(df)
-            print("are not equal")
         return df
 
     @classmethod
@@ -150,7 +149,6 @@ class Currency:
     @classmethod
     def update_df(cls):
         start_date = cls.currencies_df.index[-1].strftime('%Y-%m-%d')
-        print(start_date)
         end_date = cls.today
         df_to_extend = cls.currencies_df.copy()
         df = cls._create_dataframe(start_date, end_date)
@@ -162,15 +160,3 @@ class Currency:
             cls.save_df(extended_df)
             cls._change_df_in_class(df)
         return extended_df
-
-
-# -------------------------------------------------------------
-if __name__ == "__main__":
-    c = Currency
-    c.set_exchange_rates('HUF', '2022-03-13')
-    # print(c.currencies_df)
-    # print(c.start_date)
-    # c.set_exchange_rates('EUR', '2022-02-05')
-    # print(c.currencies_df)
-    # print('start: ', c.start_date)
-    print(c.update_df())

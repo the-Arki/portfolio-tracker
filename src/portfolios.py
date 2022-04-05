@@ -67,15 +67,8 @@ class Portfolios:
         else:
             print("There is not enough cash available for this transaction.")
 
-
-
-
-
-
-
-#########  ez jön most
     def calculate_total_value(self):
-        """get the total values of the portfolios in base currency
+        """get the total values of the individual portfolios in base currency
         and return the sum of the total values in main currency."""
         df = pd.DataFrame()
         for name, obj in self.instances.items():
@@ -84,51 +77,3 @@ class Portfolios:
         total = total_base.div(Currency().currencies_df[self.currency])
         total = total.dropna(how='all')
         return total
-
-
-###############################################################################
-if __name__ == "__main__":
-    tr1 = {"date": "2022-03-21", "type": 'Cash-In',
-           "currency": "HUF", "amount": 220}
-    tr2 = {"date": "2022-03-22", "type": 'Withdraw',
-           "currency": "HUF", "amount": 10}
-    tr3 = {"date": "2022-03-19", "type": 'Cash-In',
-           "currency": "USD", "amount": 10}
-    tr4 = {"date": "2022-03-15", "type": 'Cash-In',
-           "currency": "EUR", "amount": 1}
-    # lista = ['kakas', 'birka']
-    # io_manager.write_json(lista, 'files/portfolio_names.json')
-    x = Portfolios()
-    print(x.instances)
-    x.create_instance('birka')
-    # print(x.instances)
-    # x.delete_instance('kakas')
-    # print(x.instances)
-    # x.delete_instance('kakas')
-    def handle_tr(name, transaction):
-        x.instances[name].cash.handle_transaction(transaction)
-        return x.instances[name].cash.transactions_list
-    # x.instances['birka'].cash.handle_transaction(tr1)
-    def get_tot_value(name):
-        total_value = x.instances[name].cash.get_total_value(in_base_currency=False)
-        return total_value
-    # ####################
-    handle_tr('birka', tr1)
-    # tot1 = get_tot_value('kukorica')
-    # print(tot1)
-    print('na ez most portfolio total')
-    print(x.instances['birka'].name)
-    print(x.calculate_total_value())
-    x.create_instance('kukorica')
-    # "kukorica", "2022-03-23", "MSFT", 1, 300, 2, "USD"
-    x.buy_equity("birka", "2022-03-23", "MSFT", 1, 300, 2, "HUF")
-    x.buy_equity("birka", "2022-03-21", "TSLA", 1, 33, 2, "HUF")
-    # handle_tr('birka', tr2)
-    # print(handle_tr('birka', tr3))
-    # handle_tr('kukorica', tr4)
-    # tot2 = get_tot_value('birka')
-    # print("ez a tot2: ", tot2)
-    # print(x.instances['kukorica'].exchange_rates.currencies_df)
-    # print('név: ', x.instances["kukorica"].name)
-    # print(x.instances['kukorica'].transactions_dict)
-    
