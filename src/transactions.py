@@ -54,7 +54,3 @@ class Transactions:
         df = pd.DataFrame(
             {transaction[type]: 0}, index=dates)
         return df
-
-    def _sort_transactions_list(self, tr_list):
-        tr_list_sorted = sorted(tr_list, key=lambda transaction: transaction["date"])
-        return tr_list_sorted
