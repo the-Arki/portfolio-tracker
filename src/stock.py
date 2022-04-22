@@ -3,7 +3,7 @@ from src.currency import Currency
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from pandas_datareader import data as web
-import src.io_manager
+import src.io_manager as io_manager
 import json
 from src.transactions import Transactions
 import requests

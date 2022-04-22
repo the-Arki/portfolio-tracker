@@ -5,7 +5,7 @@ from src.cash import Cash
 from src.currency import Currency
 from src.portfolio import Portfolio
 from src.stock import Stock, StockPrice
-import src.io_manager
+import src.io_manager as io_manager
 import json
 
 

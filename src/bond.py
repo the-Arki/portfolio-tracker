@@ -1,5 +1,5 @@
 import pandas as pd
-from currency import Currency
+from src.currency import Currency
 
 
 class Bond():
