@@ -101,6 +101,9 @@ class Cash(Transactions):
                                       transaction["date"])
 
     def update_historical_df(self, df):
+        # it is wrong, should be modified
+        # --> even if df.index[-1] is today, it doesn't mean it is a final value
+        # --> it should be checked at least from the previous day somehow
         end_date = self.today
         if df.index[-1] < end_date:
             df = df.ffill()

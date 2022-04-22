@@ -4,7 +4,7 @@ from src.transactions import Transactions
 trs = Transactions()
 
 
-class TestTransactions():
+class TestTransactions:
     transaction = {"date": "2020-02-22", "amount": -1, "currency": "HUF"}
     tr_list = [{"date": "2022-03-22", "amount": -1, "currency": "HUF"}]
 
