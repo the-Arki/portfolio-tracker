@@ -17,8 +17,8 @@ portfolios = Portfolios()
 main_kv_file = "main.kv"
 
 
-class NewPortfolio(MDBoxLayout):
-    name = ObjectProperty("init")
+class AddPortfolio(MDBoxLayout):
+    name = ObjectProperty(None)
 
     def get_name(self):
         print(self.name)
@@ -34,7 +34,7 @@ class Tracker(MDApp):
         print('button has been pushed')
 
     def add_portfolio(self):
-        new = NewPortfolio()
+        new = AddPortfolio()
         self.dialog = MDDialog(
             title="Add new portfolio",
             type="custom",
