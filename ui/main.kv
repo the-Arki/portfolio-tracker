@@ -4,8 +4,22 @@ MDBoxLayout:
     orientation: "vertical"
 
     MDToolbar:
-        title: "MDTopAppBar"
+        title: "Portfolios"
+        left_action_items: [["menu", lambda x: app.test()]]
+        right_action_items: [["plus", lambda x: app.add_portfolio()], ["dots-vertical", lambda x: app.test()]]
+        anchor_title: "center"
 
     MDLabel:
         text: "Content"
         halign: "center"
+
+<NewPortfolio>:
+    name: name
+    orientation: "vertical"
+    size_hint_y: None
+
+    MDTextField:
+        id: name
+        hint_text: "Portfolio Name"
+        helper_text_mode: "persistent"
+        helper_text: ""
