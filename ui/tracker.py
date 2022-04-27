@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from kivy.properties import ObjectProperty
-from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton
@@ -16,18 +16,34 @@ from src.main import Portfolios
 portfolios = Portfolios()
 main_kv_file = "mainscreen.kv"
 
+class MyScreenManager(ScreenManager):
+    
+    def change_screen(self, name):
+        self.current = name
+
+class MainScreen(Screen):
+    pass
+
+class PortfolioScreen(Screen):
+    pass
 
 class Main(MDApp):
 
     def build(self):
         self.load_kv(main_kv_file)
-        return self.root
+        self.sm = MyScreenManager()
+        self.sm.add_widget(MainScreen(name='main'))
+        return self.sm
 
     def call_method(self, klass_, method_):
         klass = getattr(sys.modules[__name__], klass_)
         x = klass()
         method = getattr(x, method_)
         method()
+
+    def add_screen(self, name):
+        self.sm.add_widget(PortfolioScreen(name=name))
+
 
 class AddPortfolio(MDBoxLayout):
     name = ObjectProperty()
@@ -64,6 +80,7 @@ class MyDialog(MDDialog):
                 textfield.helper_text="{} has already been created".format(name)
             else:
                 portfolios.create_instance(name)
+                MDApp.get_running_app().add_screen(name)
                 self.dismiss()
 
 

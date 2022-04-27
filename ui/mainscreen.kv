@@ -1,19 +1,24 @@
 #:kivy 2.1
+# <MyScreenManager>:
+#     MainScreen:
 
-MDBoxLayout:
-    orientation: "vertical"
+<MainScreen>:
 
-    MDToolbar:
-        title: "Portfolios"
-        left_action_items: [["menu"]]
-        right_action_items: [["plus", lambda x: app.call_method('MyDialog', 'open')], ["dots-vertical"]]
-        anchor_title: "center"
+    MDBoxLayout:
+        orientation: "vertical"
 
-    MDLabel:
-        text: "Content"
-        halign: "center"
+        MDToolbar:
+            title: "Portfolios"
+            left_action_items: [["menu"]]
+            right_action_items: [["plus", lambda x: app.call_method('MyDialog', 'open')], ["dots-vertical"]]
+            anchor_title: "center"
 
-<AddPortfolio>
+        MDLabel:
+            text: "Content"
+            halign: "center"
+
+
+<AddPortfolio>:
     name: name
     orientation: "vertical"
     size_hint_y: None
@@ -24,3 +29,11 @@ MDBoxLayout:
         helper_text_mode: "persistent"
         helper_text: ""
 
+
+<PortfolioScreen>:
+
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDLabel:
+            text: "ez a portfolio layout"
