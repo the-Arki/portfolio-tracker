@@ -27,13 +27,13 @@ class Portfolios:
             print('no portfolio has been created yet')
             self.portfolio_names = []
 
-    def create_instance(self, name):
+    def create_instance(self, name, currency):
         if name in self.portfolio_names:
             print('instance already exists')
             return
         self.portfolio_names.append(name)
         self.save_new_transactions(name)
-        self.instances[name] = Portfolio(tr_dict=self.all_transactions[name], name=name)
+        self.instances[name] = Portfolio(tr_dict=self.all_transactions[name], name=name, currency=currency)
         io_manager.write_json(self.portfolio_names, 'files/portfolio_names.json')
 
     def delete_instance(self, name):

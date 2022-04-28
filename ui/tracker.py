@@ -35,28 +35,33 @@ class Main(MDApp):
         self.sm.add_widget(MainScreen(name='main'))
         return self.sm
 
+    def on_start(self):
+        for name in portfolios.portfolio_names:
+            self.add_screen(name)
+
     def call_method(self, klass_, method_):
         klass = getattr(sys.modules[__name__], klass_)
         x = klass()
         method = getattr(x, method_)
         method()
 
-    def add_screen(self, name):
+    def add_screen(self, name, currency=portfolios.currency):
         self.sm.add_widget(PortfolioScreen(name=name))
-        self.sm.get_screen('main').ids['p_list'].add_widget(PortfolioButton(text=name))
+        self.sm.get_screen('main').ids['p_list'].add_widget(PortfolioButton(text=name, currency=currency))
 
 
 class PortfolioButton(ButtonBehavior, MDBoxLayout):
     
-    def __init__(self, text, **kwargs):
+    def __init__(self, text, currency=portfolios.currency, **kwargs):
         self.text = text
+        self.currency = currency
 
         super().__init__(**kwargs)
 
 
 class AddPortfolio(MDBoxLayout):
     name = ObjectProperty()
-    pass
+    currency = ObjectProperty()
 
 
 class MyDialog(MDDialog):
@@ -73,23 +78,26 @@ class MyDialog(MDDialog):
                 ),
                 MDFlatButton(
                     text='Add',
-                    on_release=lambda _: self.get_text()
+                    on_release=lambda _: self.add_portfolio()
                 )
             ]
         }
         super().__init__(**kwargs)
 
-    def get_text(self):
-        textfield = self.content_cls.name
-        name = textfield.text
+    def add_portfolio(self):
+        p_name = self.content_cls.name
+        name = p_name.text
+        curr = self.content_cls.currency.text
+        if not curr:
+            curr = Portfolios().currency
+
         if name:
-            print(self.content_cls.name.text)
             if name in portfolios.instances.keys():
-                textfield.error=True
-                textfield.helper_text="{} has already been created".format(name)
+                p_name.error=True
+                p_name.helper_text="{} has already been created".format(name)
             else:
-                portfolios.create_instance(name)
-                MDApp.get_running_app().add_screen(name)
+                portfolios.create_instance(name, currency=curr)
+                MDApp.get_running_app().add_screen(name, currency=curr)
                 self.dismiss()
 
 
