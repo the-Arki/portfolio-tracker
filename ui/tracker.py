@@ -1,15 +1,15 @@
+from cgitb import text
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from kivy.properties import ObjectProperty
+from kivy.uix.behaviors.button import ButtonBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
-from kivymd.uix.textfield import MDTextField
-from kivymd.uix.toolbar import MDToolbar
 
 from src.main import Portfolios
 
@@ -43,6 +43,15 @@ class Main(MDApp):
 
     def add_screen(self, name):
         self.sm.add_widget(PortfolioScreen(name=name))
+        self.sm.get_screen('main').ids['p_list'].add_widget(PortfolioButton(text=name))
+
+
+class PortfolioButton(ButtonBehavior, MDBoxLayout):
+    
+    def __init__(self, text, **kwargs):
+        self.text = text
+
+        super().__init__(**kwargs)
 
 
 class AddPortfolio(MDBoxLayout):

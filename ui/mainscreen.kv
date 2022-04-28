@@ -3,8 +3,10 @@
 #     MainScreen:
 
 <MainScreen>:
+    id: main_sc
 
     MDBoxLayout:
+        id: main_box
         orientation: "vertical"
 
         MDToolbar:
@@ -13,9 +15,56 @@
             right_action_items: [["plus", lambda x: app.call_method('MyDialog', 'open')], ["dots-vertical"]]
             anchor_title: "center"
 
-        MDLabel:
-            text: "Content"
-            halign: "center"
+        MDBoxLayout:
+            size_hint_y: .05
+
+            MDLabel:
+                text: "Total"
+                halign: "center"
+
+        MDBoxLayout:
+            size_hint_y: .5
+            md_bg_color: 1, 1, 0, 1
+            
+            MDLabel:
+                text: "Graph"
+                halign: "center"
+
+        MDBoxLayout:
+            size_hint_y: .45
+
+            ScrollView:
+                size_hint: 1, 1
+
+                MDGridLayout:
+                    cols: 1
+                    size_hint_y: None
+                    id: p_list
+                    row_default_height: self.parent.parent.height/4
+                    row_force_default: True
+                    height: self.minimum_height
+                    
+                    # PortfolioButton:
+                    #     width: root.width
+                    #     size_hint_x: None
+
+
+<PortfolioButton>:
+    orientation: 'horizontal'
+    size_hint_x: 1
+    on_release: app.sm.change_screen(self.text)
+
+    MDLabel:
+        id: lbl1
+        size_hint_x: .8
+        text: root.text
+        md_bg_color: 0,1,0,1
+
+    MDLabel:
+        id: lbl2
+        size_hint_x: .2
+        text: "500 usd"
+        md_bg_color: 1,1,0,1
 
 
 <AddPortfolio>:
@@ -36,4 +85,8 @@
         orientation: "vertical"
 
         MDLabel:
-            text: "ez a portfolio layout"
+            text: "ez a {} screen".format(root.name)
+        
+        MDFlatButton:
+            text: 'back to main screen'
+            on_release: app.sm.change_screen('main')
