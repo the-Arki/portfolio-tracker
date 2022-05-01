@@ -37,7 +37,9 @@ class Main(MDApp):
 
     def on_start(self):
         for name in portfolios.portfolio_names:
-            self.add_screen(name)
+            currency = portfolios.instances[name].currency
+            value = portfolios.instances[name].value
+            self.add_screen(name, currency, value)
 
     def call_method(self, klass_, method_):
         klass = getattr(sys.modules[__name__], klass_)
@@ -45,16 +47,19 @@ class Main(MDApp):
         method = getattr(x, method_)
         method()
 
-    def add_screen(self, name, currency=portfolios.currency):
+    def add_screen(self, name, currency=portfolios.currency, value=0):
+        if portfolios.instances[name].value:
+            value = portfolios.instances[name].value
         self.sm.add_widget(PortfolioScreen(name=name))
-        self.sm.get_screen('main').ids['p_list'].add_widget(PortfolioButton(text=name, currency=currency))
+        self.sm.get_screen('main').ids['p_list'].add_widget(PortfolioButton(text=name, currency=currency, value=value))
 
 
 class PortfolioButton(ButtonBehavior, MDBoxLayout):
     
-    def __init__(self, text, currency=portfolios.currency, **kwargs):
+    def __init__(self, text, currency=portfolios.currency, value=0, **kwargs):
         self.text = text
         self.currency = currency
+        self.value = value
 
         super().__init__(**kwargs)
 

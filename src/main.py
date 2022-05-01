@@ -21,17 +21,17 @@ class Portfolios:
         try:
             self.portfolio_names = io_manager.read_json(
                 'files/portfolio_names.json')
-            for name in self.portfolio_names:
-                self.instances[name] = Portfolio(tr_dict=self.all_transactions[name], name=name)
+            for name in self.portfolio_names.keys():
+                self.instances[name] = Portfolio(tr_dict=self.all_transactions[name], name=name, currency=self.portfolio_names[name])
         except (json.decoder.JSONDecodeError, FileNotFoundError):
             print('no portfolio has been created yet')
-            self.portfolio_names = []
+            self.portfolio_names = {}
 
     def create_instance(self, name, currency):
-        if name in self.portfolio_names:
+        if name in self.portfolio_names.keys():
             print('instance already exists')
             return
-        self.portfolio_names.append(name)
+        self.portfolio_names[name] = currency
         self.save_new_transactions(name)
         self.instances[name] = Portfolio(tr_dict=self.all_transactions[name], name=name, currency=currency)
         io_manager.write_json(self.portfolio_names, 'files/portfolio_names.json')
