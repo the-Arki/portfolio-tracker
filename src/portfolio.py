@@ -16,14 +16,14 @@ class Portfolio:
 
     def __init__(self, currency="HUF", tr_dict={}, name=None):
         self.transactions_dict = self.setup_tr_dict(tr_dict)
-        self.exchange_rates = Currency
+        self.exchange_rates = Currency()
         self.currency = currency
         self.bond = Bond(currency, tr_list=self.transactions_dict['Bond'], name=name)
         self.cash = Cash(currency, tr_list=self.transactions_dict['Cash'], name=name)
         self.name = name
         self.stock = Stock(currency, tr_list=self.transactions_dict['Stock'], name=name)
         self.set_currency(currency)
-        self.value = self.get_current_value(self.get_total_value())
+        self.value = self.get_current_value(self.get_total_value(in_base_currency=False))
 
     def setup_tr_dict(self, tr_dict):
         if not tr_dict:
@@ -42,7 +42,7 @@ class Portfolio:
         if in_base_currency:
             return total
         else:
-            total_actual_currency = total.div(self.exchange_rates[self.currency])
+            total_actual_currency = total.div(self.exchange_rates.currencies_df[self.currency])
             total_actual_currency.name = self.currency
             return total_actual_currency
 

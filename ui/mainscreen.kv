@@ -61,7 +61,7 @@
     MDLabel:
         id: lbl2
         size_hint_x: .2
-        text: str(root.value) + ' ' + root.currency
+        text: str(round(root.value, 2)) + ' ' + root.currency
         md_bg_color: 1,1,0,1
 
 
@@ -89,9 +89,79 @@
     MDBoxLayout:
         orientation: "vertical"
 
-        MDLabel:
-            text: "ez a {} screen".format(root.name)
-        
+        MDToolbar:
+            title: root.name
+            left_action_items: [["menu"]]
+            right_action_items: [["plus", lambda x: app.call_method('TransactionDialog', 'open', name=root.name)], ["dots-vertical"]]
+            anchor_title: "center"
+
+        MDBoxLayout:
+            size_hint_y: .05
+
+            MDLabel:
+                text: str(round(app.portfolios.instances[root.name].value, 2)) + " " + root.currency
+                halign: "center"
+
+        MDBoxLayout:
+            size_hint_y: .5
+            md_bg_color: 1, 1, 0, 1
+            
+            MDLabel:
+                text: "Graph"
+                halign: "center"
+
+        MDBoxLayout:
+            size_hint_y: .45
+
+            ScrollView:
+                size_hint: 1, 1
+
+                MDGridLayout:
+                    cols: 1
+                    size_hint_y: None
+                    id: p_list
+                    row_default_height: self.parent.parent.height/4
+                    row_force_default: True
+                    height: self.minimum_height
+                    spacing: 10, 10
+                    padding: 0, 10, 0, 0
+    
         MDFlatButton:
             text: 'back to main screen'
             on_release: app.sm.change_screen('main')
+
+        MDFlatButton:
+            text: 'add a new transaction'
+            on_release: app.call_method('TransactionDialog', 'open', name=root.name)
+
+
+<NewTransaction>:
+    date: date
+    currency: currency
+    type: type
+    amount: amount
+    size_hint_y: None
+    height: self.ids.date.height * 4
+    cols: 1
+
+    MDTextField:
+        id: date
+        hint_text: "Date of Transaction"
+        helper_text_mode: "persistent"
+        helper_text: ""
+        text: '2022-02-22'
+
+    MDTextField:
+        id: currency
+        hint_text: "Currency"
+        text: 'EUR'
+
+    MDTextField:
+        id: type
+        hint_text: "Sell or Cash-In / Buy or Withdraw"
+        text: 'Cash-In'
+
+    MDTextField:
+        id: amount
+        hint_text: 'Amount'
+        text: '500'
