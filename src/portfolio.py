@@ -25,6 +25,9 @@ class Portfolio:
         self.set_currency(currency)
         self.value = self.get_current_value(self.get_total_value(in_base_currency=False))
 
+    def update_value(self):
+        self.value = self.get_current_value(self.get_total_value(in_base_currency=False))
+
     def setup_tr_dict(self, tr_dict):
         if not tr_dict:
             for item in ('Bond', 'Cash', 'Stock'):
@@ -39,6 +42,8 @@ class Portfolio:
                 df[item.__class__.__name__] = item.get_total_value()
                 df.append(df[item.__class__.__name__])
         total = df.sum(axis=1)
+        if df.empty:
+            return df
         if in_base_currency:
             return total
         else:

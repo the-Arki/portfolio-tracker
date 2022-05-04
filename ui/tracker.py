@@ -1,10 +1,9 @@
-from cgitb import text
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from kivy.core.window import Window
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, NumericProperty
 from kivy.uix.behaviors.button import ButtonBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.app import MDApp
@@ -28,10 +27,17 @@ class MainScreen(Screen):
 
 class PortfolioScreen(Screen):
     currency = ObjectProperty()
+    value = NumericProperty()
+
+    def __init__(self, currency, value, **kwargs):
+        self.currency = currency
+        self.value = int(value)
+        super().__init__(**kwargs)
 
 class Main(MDApp):
     portfolios = Portfolios()
     sm = MyScreenManager()
+    portfolio_buttons = {}
 
     def build(self):
         self.load_kv(main_kv_file)
@@ -51,18 +57,19 @@ class Main(MDApp):
         method()
 
     def add_screen(self, name, currency=portfolios.currency, value=0):
-        if self.portfolios.instances[name].value:
-            value = self.portfolios.instances[name].value
-        self.sm.add_widget(PortfolioScreen(name=name, currency=currency))
-        self.sm.get_screen('main').ids['p_list'].add_widget(PortfolioButton(text=name, currency=currency, value=value))
+        p_button = PortfolioButton(text=name, currency=currency, value=value)
+        self.sm.add_widget(PortfolioScreen(name=name, currency=currency, value=value))
+        self.sm.get_screen('main').ids['p_list'].add_widget(p_button)
+        self.portfolio_buttons[name] = p_button
 
 
 class PortfolioButton(ButtonBehavior, MDBoxLayout):
-    
+    value = NumericProperty()
+
     def __init__(self, text, currency=Main().portfolios.currency, value=0, **kwargs):
         self.text = text
         self.currency = currency
-        self.value = value
+        self.value = int(value)
 
         super().__init__(**kwargs)
 
@@ -97,7 +104,7 @@ class MyDialog(MDDialog):
         name = p_name.text
         curr = self.content_cls.currency.text
         if not curr:
-            curr = Portfolios().currency
+            curr = Main().portfolios.currency
 
         if name:
             if name in Main().portfolios.instances.keys():
@@ -116,7 +123,7 @@ class NewTransaction(MDGridLayout):
     amount = ObjectProperty()
 
 class TransactionDialog(MDDialog):
-    # portfolio_name = None
+    portfolio_name = None
 
     def __init__(self, name):
         self.portfolio_name = name
@@ -141,11 +148,14 @@ class TransactionDialog(MDDialog):
         date = self.content_cls.date.text
         curr = self.content_cls.currency.text
         type = self.content_cls.type.text
-        amount = int(self.content_cls.amount.text)
+        amount = float(self.content_cls.amount.text)
         transaction = {'date': date, 'currency': curr, 'type': type, 'amount': amount}
         if not curr:
             curr = Portfolios().currency
         Main().portfolios.instances[self.portfolio_name].cash.handle_transaction(transaction)
+        Main().portfolios.instances[self.portfolio_name].update_value()
+        MDApp.get_running_app().portfolio_buttons[self.portfolio_name].value = int(Main().portfolios.instances[self.portfolio_name].value)
+        MDApp.get_running_app().sm.get_screen(self.portfolio_name).value = int(Main().portfolios.instances[self.portfolio_name].value)
         self.dismiss()
 
 

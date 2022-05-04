@@ -99,7 +99,7 @@
             size_hint_y: .05
 
             MDLabel:
-                text: str(round(app.portfolios.instances[root.name].value, 2)) + " " + root.currency
+                text: str(root.value) + " " + root.currency
                 halign: "center"
 
         MDBoxLayout:
