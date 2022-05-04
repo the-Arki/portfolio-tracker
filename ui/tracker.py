@@ -150,8 +150,6 @@ class TransactionDialog(MDDialog):
         type = self.content_cls.type.text
         amount = float(self.content_cls.amount.text)
         transaction = {'date': date, 'currency': curr, 'type': type, 'amount': amount}
-        if not curr:
-            curr = Portfolios().currency
         Main().portfolios.instances[self.portfolio_name].cash.handle_transaction(transaction)
         Main().portfolios.instances[self.portfolio_name].update_value()
         MDApp.get_running_app().portfolio_buttons[self.portfolio_name].value = int(Main().portfolios.instances[self.portfolio_name].value)
