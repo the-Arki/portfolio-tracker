@@ -26,6 +26,7 @@ class Portfolios:
         except (json.decoder.JSONDecodeError, FileNotFoundError):
             print('no portfolio has been created yet')
             self.portfolio_names = {}
+        self.value = self.get_current_value(self.calculate_total_value())
 
     def create_instance(self, name, currency):
         if name in self.portfolio_names.keys():
@@ -77,3 +78,11 @@ class Portfolios:
         total = total_base.div(Currency().currencies_df[self.currency])
         total = total.dropna(how='all')
         return total
+
+    def get_current_value(self, df):
+        if df.empty:
+            return 0
+        return df[-1]
+
+    def update_value(self):
+        self.value = self.get_current_value(self.calculate_total_value())
