@@ -1,9 +1,12 @@
+from locale import currency
 import sys
 import os
+
+from numpy import kaiser
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from kivy.core.window import Window
-from kivy.properties import ObjectProperty, NumericProperty
+from kivy.properties import ObjectProperty, NumericProperty, StringProperty
 from kivy.uix.behaviors.button import ButtonBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.app import MDApp
@@ -17,22 +20,12 @@ from src.main import Portfolios
 Window.size = (360, 640)
 main_kv_file = "mainscreen.kv"
 
+
 class MyScreenManager(ScreenManager):
     
     def change_screen(self, name):
         self.current = name
 
-class MainScreen(Screen):
-    pass
-
-class PortfolioScreen(Screen):
-    currency = ObjectProperty()
-    value = NumericProperty()
-
-    def __init__(self, currency, value, **kwargs):
-        self.currency = currency
-        self.value = int(value)
-        super().__init__(**kwargs)
 
 class Main(MDApp):
     portfolios = Portfolios()
@@ -41,7 +34,9 @@ class Main(MDApp):
 
     def build(self):
         self.load_kv(main_kv_file)
-        self.sm.add_widget(MainScreen(name='main'))
+        value = int(self.portfolios.value)
+        currency = self.portfolios.currency
+        self.sm.add_widget(MainScreen(name='main', value=value, currency=currency))
         return self.sm
 
     def on_start(self):
@@ -61,6 +56,14 @@ class Main(MDApp):
         self.sm.add_widget(PortfolioScreen(name=name, currency=currency, value=value))
         self.sm.get_screen('main').ids['p_list'].add_widget(p_button)
         self.portfolio_buttons[name] = p_button
+
+
+# -----------------  MainScreen  ----------------------------
+
+
+class MainScreen(Screen):
+    value = NumericProperty()
+    currency = StringProperty()
 
 
 class PortfolioButton(ButtonBehavior, MDBoxLayout):
@@ -104,23 +107,41 @@ class MyDialog(MDDialog):
         name = p_name.text
         curr = self.content_cls.currency.text
         if not curr:
-            curr = Main().portfolios.currency
+            curr = MDApp.get_running_app().portfolios.currency
 
         if name:
-            if name in Main().portfolios.instances.keys():
+            if name in MDApp.get_running_app().portfolios.instances.keys():
                 p_name.error=True
                 p_name.helper_text="{} has already been created".format(name)
             else:
-                Main().portfolios.create_instance(name, currency=curr)
+                MDApp.get_running_app().portfolios.create_instance(name, currency=curr)
                 MDApp.get_running_app().add_screen(name, currency=curr)
                 self.dismiss()
 
+
+# -----------------  PortfolioScreen  -----------------------
+
+
+class PortfolioScreen(Screen):
+    currency = ObjectProperty()
+    value = NumericProperty()
+
+    def __init__(self, currency, value, **kwargs):
+        self.currency = currency
+        self.value = int(value)
+        super().__init__(**kwargs)
+
+    def on_value(self, instance, value):
+        MDApp.get_running_app().portfolios.update_value()
+        MDApp.get_running_app().sm.get_screen('main').value = int(MDApp.get_running_app().portfolios.value)
+        print('igy ok')
 
 class NewTransaction(MDGridLayout):
     date = ObjectProperty()
     currency = ObjectProperty()
     type = ObjectProperty()
     amount = ObjectProperty()
+
 
 class TransactionDialog(MDDialog):
     portfolio_name = None
@@ -150,12 +171,11 @@ class TransactionDialog(MDDialog):
         type = self.content_cls.type.text
         amount = float(self.content_cls.amount.text)
         transaction = {'date': date, 'currency': curr, 'type': type, 'amount': amount}
-        Main().portfolios.instances[self.portfolio_name].cash.handle_transaction(transaction)
-        Main().portfolios.instances[self.portfolio_name].update_value()
-        MDApp.get_running_app().portfolio_buttons[self.portfolio_name].value = int(Main().portfolios.instances[self.portfolio_name].value)
-        MDApp.get_running_app().sm.get_screen(self.portfolio_name).value = int(Main().portfolios.instances[self.portfolio_name].value)
+        MDApp.get_running_app().portfolios.instances[self.portfolio_name].cash.handle_transaction(transaction)
+        MDApp.get_running_app().portfolios.instances[self.portfolio_name].update_value()
+        MDApp.get_running_app().portfolio_buttons[self.portfolio_name].value = int(MDApp.get_running_app().portfolios.instances[self.portfolio_name].value)
+        MDApp.get_running_app().sm.get_screen(self.portfolio_name).value = int(MDApp.get_running_app().portfolios.instances[self.portfolio_name].value)
         self.dismiss()
-
 
 
 if __name__ == "__main__":
