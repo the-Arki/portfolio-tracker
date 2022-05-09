@@ -20,10 +20,11 @@
         MDBoxLayout:
             size_hint_y: .5
             md_bg_color: 1, 1, 0, 1
+            id: graph
             
-            MDLabel:
-                text: "Graph"
-                halign: "center"
+            Image:
+                id: img
+                source: './files/images/' + root.name + '_graph.png'
 
         MDBoxLayout:
             size_hint_y: .45

@@ -1,11 +1,12 @@
 #:kivy 2.1
 #:include portfolioscreen.kv
 
-# <MyScreenManager>:
-#     MainScreen:
+<MyScreenManager>:
+    MainScreen:
 
 <MainScreen>:
     id: main_sc
+    name: 'main'
 
     MDBoxLayout:
         id: main_box
@@ -14,7 +15,7 @@
         MDToolbar:
             title: "Portfolios"
             left_action_items: [["menu"]]
-            right_action_items: [["plus", lambda x: app.call_method('MyDialog', 'open')], ["dots-vertical"]]
+            right_action_items: [["plus", lambda x: app.call_method('MyDialog', 'open')], ["dots-vertical", lambda _: app.test()]]
             anchor_title: "center"
 
         MDBoxLayout:
@@ -27,10 +28,11 @@
         MDBoxLayout:
             size_hint_y: .5
             md_bg_color: 1, 1, 0, 1
+            id: graph
             
-            MDLabel:
-                text: "Graph"
-                halign: "center"
+            Image:
+                id: img
+                source: './files/images/main_graph.png'
 
         MDBoxLayout:
             size_hint_y: .45

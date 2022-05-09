@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import datetime
 from src.bond import Bond
@@ -86,3 +87,13 @@ class Portfolios:
 
     def update_value(self):
         self.value = self.get_current_value(self.calculate_total_value())
+
+    def plot(self, name):
+        df = self.calculate_total_value()
+        df.plot(kind='line')
+        plt.savefig('./files/images/' + name + '_graph.png')
+        plt.close()
+
+if __name__ == "__main__":
+    x = Portfolios()
+    x.plot(64,64)

@@ -1,14 +1,14 @@
-from locale import currency
 import sys
 import os
 
-from numpy import kaiser
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from kivy.core.window import Window
+from kivy.graphics.texture import Texture
 from kivy.properties import ObjectProperty, NumericProperty, StringProperty
 from kivy.uix.behaviors.button import ButtonBehavior
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.image import Image
+from kivy.uix.screenmanager import ScreenManager, Screen, ScreenManagerException
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.gridlayout import MDGridLayout
@@ -16,6 +16,7 @@ from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 
 from src.main import Portfolios
+from src.io_manager import save_plot
 
 Window.size = (360, 640)
 main_kv_file = "mainscreen.kv"
@@ -31,6 +32,7 @@ class Main(MDApp):
     portfolios = Portfolios()
     sm = MyScreenManager()
     portfolio_buttons = {}
+    img = Texture.create()
 
     def build(self):
         self.load_kv(main_kv_file)
@@ -39,7 +41,16 @@ class Main(MDApp):
         self.sm.add_widget(MainScreen(name='main', value=value, currency=currency))
         return self.sm
 
+    def change_graph(self, name='main'):
+        if name == 'main':
+            df = self.portfolios.calculate_total_value()
+        else:
+            df = self.portfolios.instances[name].get_total_value(in_base_currency=False)
+        save_plot(name, df)
+        self.sm.get_screen(name).ids.img.reload()
+
     def on_start(self):
+        # self.portfolios.plot()
         for name in self.portfolios.portfolio_names:
             currency = self.portfolios.instances[name].currency
             value = self.portfolios.instances[name].value
@@ -62,8 +73,14 @@ class Main(MDApp):
 
 
 class MainScreen(Screen):
-    value = NumericProperty()
+    value = NumericProperty(None)
     currency = StringProperty()
+
+    # def on_value(self, instance, value):
+    #     try:
+    #         MDApp.get_running_app().change_graph()
+    #     except ScreenManagerException:
+    #         pass
 
 
 class PortfolioButton(ButtonBehavior, MDBoxLayout):
@@ -130,11 +147,19 @@ class PortfolioScreen(Screen):
         self.currency = currency
         self.value = int(value)
         super().__init__(**kwargs)
+        self.name = super().name
 
     def on_value(self, instance, value):
         MDApp.get_running_app().portfolios.update_value()
         MDApp.get_running_app().sm.get_screen('main').value = int(MDApp.get_running_app().portfolios.value)
-        print('igy ok')
+        try:
+            MDApp.get_running_app().change_graph(self.name)
+        except ScreenManagerException:
+            pass
+        try:
+            MDApp.get_running_app().change_graph()
+        except ScreenManagerException:
+            pass
 
 class NewTransaction(MDGridLayout):
     date = ObjectProperty()
