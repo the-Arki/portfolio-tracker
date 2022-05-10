@@ -68,6 +68,9 @@ class Main(MDApp):
         self.sm.get_screen('main').ids['p_list'].add_widget(p_button)
         self.portfolio_buttons[name] = p_button
 
+    def create_screen(self, name, portfolio_name):
+        self.sm.add_widget(BuyEquity(name=name, p_name=portfolio_name))
+        self.sm.current = name
 
 # -----------------  MainScreen  ----------------------------
 
@@ -202,6 +205,12 @@ class TransactionDialog(MDDialog):
         MDApp.get_running_app().sm.get_screen(self.portfolio_name).value = int(MDApp.get_running_app().portfolios.instances[self.portfolio_name].value)
         self.dismiss()
 
+
+class BuyEquity(Screen):
+    def __init__(self, name, p_name, **kwargs):
+        self.name = name
+        self.p_name = p_name
+        super().__init__(**kwargs)
 
 if __name__ == "__main__":
     Main().run()
