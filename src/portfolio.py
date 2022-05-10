@@ -56,7 +56,9 @@ class Portfolio:
             return 0
         return df[-1]
 
-
+    def buy_equity(self, date, ticker, amount, unit_price, fee, currency):
+        transaction = self.stock.buy(date, ticker, amount, unit_price, fee, currency)
+        self.cash.handle_transaction(transaction)
 
     def set_currency(self, currency):
         """set the currency for all the instances (bond, cash, stock),

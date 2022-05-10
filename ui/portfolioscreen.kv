@@ -84,9 +84,16 @@
 
 
 <BuyEquity>:
+    date: date
+    ticker: ticker
+    amount: amount
+    unit_price: unit_price
+    fee: fee
+    currency: currency
 
     MDBoxLayout:
         orientation: 'vertical'
+
         MDTextField:
             id: date
             hint_text: "Date of Transaction"
@@ -122,6 +129,6 @@
             on_release: app.sm.change_screen(root.p_name)
 
         MDFlatButton:
-            text: 'add a new transaction'
-            on_release: app.call_method('TransactionDialog', 'open', name=root.name)
+            text: 'save'
+            on_release: root.buy_equity()
 

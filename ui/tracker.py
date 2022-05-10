@@ -207,10 +207,29 @@ class TransactionDialog(MDDialog):
 
 
 class BuyEquity(Screen):
+    date = ObjectProperty()
+    ticker = ObjectProperty()
+    amount = ObjectProperty()
+    unit_price = ObjectProperty()
+    fee = ObjectProperty()
+    currency = ObjectProperty()
+
     def __init__(self, name, p_name, **kwargs):
         self.name = name
         self.p_name = p_name
         super().__init__(**kwargs)
+
+    def buy_equity(self):
+        date = self.date.text
+        ticker = self.ticker.text
+        amount = float(self.amount.text)
+        unit_price = float(self.unit_price.text)
+        fee = float(self.fee.text)
+        currency = self.currency.text
+        MDApp.get_running_app().portfolios.instances[self.p_name].buy_equity(date, ticker, amount, unit_price, fee, currency)
+
+
+
 
 if __name__ == "__main__":
     Main().run()

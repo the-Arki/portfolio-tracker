@@ -50,7 +50,8 @@ class Stock(Transactions):
         """ Check if the quantity of the ticker in the portfolio is >= quantity.
         if so, then return the transaction in dictionary form.
         e.g. return {'ticker': 'MSFT', 'date': '2022-02-02', 'quantity': 6, 'price': 120, 'fee': 2, 'currency': 'USD'} """
-        self.handle_transaction(date, ticker, amount, unit_price, fee, currency, type="Sell")
+        tr = self.handle_transaction(date, ticker, amount, unit_price, fee, currency, type="Sell")
+        return tr
 
     def handle_transaction(self, date, ticker, amount, unit_price, fee, currency, type=None):
         tr = {"date": date, "ticker": ticker, "amount": amount,
