@@ -143,11 +143,12 @@ class StockPrice:
     @classmethod
     def add_stock_price(cls, ticker):
         start_date = cls.today - relativedelta(years=10)
+        dates = pd.date_range(start=start_date, end=cls.today, freq="D")
+        df = pd.DataFrame(index=dates)
         series = web.DataReader(ticker, data_source='yahoo', start=start_date, end=cls.today)['Adj Close']
-        df = pd.DataFrame()
         df[ticker] = series
         df = df.loc[~df.index.duplicated()]
-        df = df.dropna()
+        df = df.ffill()
         return df
 
     @classmethod

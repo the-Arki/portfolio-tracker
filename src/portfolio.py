@@ -49,6 +49,7 @@ class Portfolio:
         else:
             total_actual_currency = total.div(self.exchange_rates.currencies_df[self.currency])
             total_actual_currency.name = self.currency
+            total_actual_currency = total_actual_currency.dropna(how='all')
             return total_actual_currency
 
     def get_current_value(self, df):

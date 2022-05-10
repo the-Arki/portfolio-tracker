@@ -104,29 +104,31 @@
         MDTextField:
             id: ticker
             hint_text: 'Ticker (e.g. MSFT)'
+            text: 'MSFT'
 
         MDTextField:
             id: amount
             hint_text: 'Quantity'
+            text: '10'
 
         MDTextField:
             id: unit_price
             hint_text: 'Unit Price'
-            text: '500'
+            text: '5'
 
         MDTextField:
             id: fee
             hint_text: 'Fee'
-            text: '500'
+            text: '1'
 
         MDTextField:
             id: currency
             hint_text: "Currency"
-            text: 'EUR'
+            text: 'USD'
 
         MDFlatButton:
             text: 'cancel'
-            on_release: app.sm.change_screen(root.p_name)
+            on_release: app.sm.change_screen(root.portfolio_name)
 
         MDFlatButton:
             text: 'save'

@@ -50,7 +50,6 @@ class Main(MDApp):
         self.sm.get_screen(name).ids.img.reload()
 
     def on_start(self):
-        # self.portfolios.plot()
         for name in self.portfolios.portfolio_names:
             currency = self.portfolios.instances[name].currency
             value = self.portfolios.instances[name].value
@@ -216,7 +215,7 @@ class BuyEquity(Screen):
 
     def __init__(self, name, p_name, **kwargs):
         self.name = name
-        self.p_name = p_name
+        self.portfolio_name = p_name
         super().__init__(**kwargs)
 
     def buy_equity(self):
@@ -226,8 +225,10 @@ class BuyEquity(Screen):
         unit_price = float(self.unit_price.text)
         fee = float(self.fee.text)
         currency = self.currency.text
-        MDApp.get_running_app().portfolios.instances[self.p_name].buy_equity(date, ticker, amount, unit_price, fee, currency)
-
+        MDApp.get_running_app().portfolios.instances[self.portfolio_name].buy_equity(date, ticker, amount, unit_price, fee, currency)
+        MDApp.get_running_app().portfolios.instances[self.portfolio_name].update_value()
+        MDApp.get_running_app().portfolio_buttons[self.portfolio_name].value = int(MDApp.get_running_app().portfolios.instances[self.portfolio_name].value)
+        MDApp.get_running_app().sm.get_screen(self.portfolio_name).value = int(MDApp.get_running_app().portfolios.instances[self.portfolio_name].value)
 
 
 

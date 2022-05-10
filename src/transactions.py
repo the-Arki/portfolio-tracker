@@ -51,6 +51,5 @@ class Transactions:
         else:
             end_date = self.historical_df.index[0] - pd.Timedelta(days=1)
         dates = pd.date_range(start=start_date, end=end_date, freq="D")
-        df = pd.DataFrame(
-            {transaction[type]: 0}, index=dates)
+        df = pd.DataFrame({transaction[type]: 0}, index=dates)
         return df
