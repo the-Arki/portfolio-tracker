@@ -229,6 +229,7 @@ class BuyEquity(Screen):
         MDApp.get_running_app().portfolios.instances[self.portfolio_name].update_value()
         MDApp.get_running_app().portfolio_buttons[self.portfolio_name].value = int(MDApp.get_running_app().portfolios.instances[self.portfolio_name].value)
         MDApp.get_running_app().sm.get_screen(self.portfolio_name).value = int(MDApp.get_running_app().portfolios.instances[self.portfolio_name].value)
+        MDApp.get_running_app().sm.current = self.portfolio_name
 
 
 
