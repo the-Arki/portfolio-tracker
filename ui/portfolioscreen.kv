@@ -14,7 +14,7 @@
             size_hint_y: .05
 
             MDLabel:
-                text: str(root.value) + " " + root.currency
+                text: "Portfolio Total: " + str(root.value) + " " + root.currency
                 halign: "center"
 
         MDBoxLayout:
@@ -28,6 +28,14 @@
 
         MDBoxLayout:
             size_hint_y: .45
+            orientation: 'vertical'
+
+            MDLabel:
+                text: 'Available Cash'
+
+            MDGridLayout:
+                id: cash
+                cols: 2
 
             ScrollView:
                 size_hint: 1, 1
@@ -50,6 +58,9 @@
             text: 'buy equity'
             on_release: app.create_screen(root.name + '_buy', root.name)
 
+        MDFlatButton:
+            text: 'check the values'
+            on_release: root.show_cash()
 
 <NewTransaction>:
     date: date

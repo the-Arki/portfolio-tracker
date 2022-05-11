@@ -14,6 +14,7 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
+from kivymd.uix.label import MDLabel
 
 from src.main import Portfolios
 from src.io_manager import save_plot
@@ -55,6 +56,12 @@ class Main(MDApp):
             value = self.portfolios.instances[name].value
             self.add_screen(name, currency, value)
 
+    def show_cash(self, name):
+        df = self.portfolios.instances[name].cash.historical_df
+        if not df.empty:
+            for currency in df.columns:
+                print('ez a {} utolso erteke'.format(currency), df[currency][-1])
+
     def call_method(self, klass_, method_, **kwargs):
         klass = getattr(sys.modules[__name__], klass_)
         x = klass(**kwargs)
@@ -64,6 +71,7 @@ class Main(MDApp):
     def add_screen(self, name, currency=portfolios.currency, value=0):
         p_button = PortfolioButton(text=name, currency=currency, value=value)
         self.sm.add_widget(PortfolioScreen(name=name, currency=currency, value=value))
+        self.sm.get_screen(name).show_cash()
         self.sm.get_screen('main').ids['p_list'].add_widget(p_button)
         self.portfolio_buttons[name] = p_button
 
@@ -162,6 +170,21 @@ class PortfolioScreen(Screen):
             MDApp.get_running_app().change_graph()
         except ScreenManagerException:
             pass
+        self.show_cash()
+
+    def show_cash(self):
+        df = MDApp.get_running_app().portfolios.instances[self.name].cash.historical_df
+        cash_dict = {}
+        if not df.empty:
+            for currency in df.columns:
+                if int(df[currency][-1]):
+                    cash_dict[currency] = int(df[currency][-1])
+        else:
+            cash_dict[""] = "There is no available cash yet."
+        self.ids.cash.clear_widgets()
+        for k, v in cash_dict.items():
+            self.ids.cash.add_widget(MDLabel(text=str(v)))
+            self.ids.cash.add_widget(MDLabel(text=str(k)))
 
 class NewTransaction(MDGridLayout):
     date = ObjectProperty()
