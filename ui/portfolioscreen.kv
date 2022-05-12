@@ -32,11 +32,18 @@
 
             MDLabel:
                 text: 'Available Cash'
+                size_hint_y: .15
 
             MDGridLayout:
                 id: cash
                 cols: 2
+                row_default_height: self.parent.height/10
+                row_force_default: True
 
+            MDLabel:
+                text: 'Equity'
+                size_hint_y: .15
+                
             ScrollView:
                 size_hint: 1, 1
 
@@ -44,11 +51,12 @@
                     cols: 1
                     size_hint_y: None
                     id: p_list
-                    row_default_height: self.parent.parent.height/4
-                    row_force_default: True
+                    row_default_height: self.parent.parent.height/10
+                    row_force_default: False
                     height: self.minimum_height
                     spacing: 10, 10
-                    padding: 0, 10, 0, 0
+                    # padding: 0, 10, 0, 0
+
     
         MDFlatButton:
             text: 'back to main screen'
@@ -59,8 +67,28 @@
             on_release: app.create_screen(root.name + '_buy', root.name)
 
         MDFlatButton:
-            text: 'check the values'
-            on_release: root.show_cash()
+            text: 'check stock values'
+            on_release: root.show_stock()
+
+
+<StockItems>:
+    ticker: ticker
+    quantity: quantity
+    value: value
+    orientation: 'horizontal'
+    
+    MDLabel:
+        id: ticker
+        text: str(root.ticker)
+
+    MDLabel:
+        id: quantity
+        text: str(root.quantity)
+
+    MDLabel:
+        id: value
+        text: str(root.value)
+
 
 <NewTransaction>:
     date: date

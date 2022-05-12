@@ -72,6 +72,7 @@ class Main(MDApp):
         p_button = PortfolioButton(text=name, currency=currency, value=value)
         self.sm.add_widget(PortfolioScreen(name=name, currency=currency, value=value))
         self.sm.get_screen(name).show_cash()
+        self.sm.get_screen(name).show_stock()
         self.sm.get_screen('main').ids['p_list'].add_widget(p_button)
         self.portfolio_buttons[name] = p_button
 
@@ -171,6 +172,7 @@ class PortfolioScreen(Screen):
         except ScreenManagerException:
             pass
         self.show_cash()
+        self.show_stock()
 
     def show_cash(self):
         df = MDApp.get_running_app().portfolios.instances[self.name].cash.historical_df
@@ -185,6 +187,29 @@ class PortfolioScreen(Screen):
         for k, v in cash_dict.items():
             self.ids.cash.add_widget(MDLabel(text=str(v)))
             self.ids.cash.add_widget(MDLabel(text=str(k)))
+
+    def show_stock(self):
+        stock = MDApp.get_running_app().portfolios.instances[self.name].stock.historical_df
+        stock_value = MDApp.get_running_app().portfolios.instances[self.name].stock.stock_value_df
+        self.ids.p_list.clear_widgets()
+        for ticker in stock_value.columns:
+            quantity = stock[ticker][-1]
+            value = stock_value[ticker][-1]
+            self.ids.p_list.add_widget(StockItems(ticker, quantity, value))
+
+
+class StockItems(MDBoxLayout):
+    ticker = ObjectProperty()
+    quantity = ObjectProperty()
+    value = ObjectProperty()
+
+    def __init__(self, ticker, quantity, value, **kwargs):
+        super().__init__(**kwargs)
+        self.ticker = ticker
+        self.quantity = quantity
+        self.value = value
+
+
 
 class NewTransaction(MDGridLayout):
     date = ObjectProperty()
