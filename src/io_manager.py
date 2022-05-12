@@ -1,5 +1,6 @@
 import json
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 
@@ -15,6 +16,8 @@ def write_json(data, filename):
 
 
 def save_plot(name, df):
-    df.plot(kind='line')
+    values = df.to_numpy()
+    max_value = int(np.amax(values))
+    df.plot(kind='line', ylim=(0, max_value))
     plt.savefig('./files/images/' + name + '_graph.png')
     plt.close()
