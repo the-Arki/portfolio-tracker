@@ -158,5 +158,5 @@ class Currency:
         extended_df = extended_df[~extended_df.index.duplicated(keep='last')]
         if not extended_df.equals(df_to_extend):
             cls.save_df(extended_df)
-            cls._change_df_in_class(df)
+            cls._change_df_in_class(extended_df)
         return extended_df
