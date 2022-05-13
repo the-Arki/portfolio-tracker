@@ -15,6 +15,7 @@ class Portfolios:
 
     def __init__(self, currency="HUF"):
         self.currency = currency
+        Currency().update_df()
         try:
             self.all_transactions = io_manager.read_json('files/transactions.json')
         except (json.decoder.JSONDecodeError, FileNotFoundError):
@@ -96,4 +97,3 @@ class Portfolios:
 
 if __name__ == "__main__":
     x = Portfolios()
-    x.plot(64,64)
