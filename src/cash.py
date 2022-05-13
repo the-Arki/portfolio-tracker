@@ -67,26 +67,30 @@ class Cash(Transactions):
         return transaction_
 
     def _validate_transaction(self, transaction):
-        tr = transaction
-        if tr["amount"] >= 0:
-            return True
-        else:
-            if (not self.historical_df.empty and
-                tr["currency"] in self.historical_df.columns and
-                (tr["amount"] +
-                 (min(self.historical_df.loc[self.historical_df.index >= tr["date"], tr["currency"]])) >= 0)):
-                return True
-            else:
-                print("Not enough cash available for this transaction.")
-                while True:
-                    decision = input("Test it? (Yes or No)")
-                    if decision.lower() == "yes":
-                        return True
-                    elif decision.lower() == "no":
-                        return False
-                    else:
-                        print(("TypeError - The answer {} is incorrect."
-                               .format(decision)))
+        """temporarely ignored, therefore as default returns True"""
+        return True
+        # """Checks whether there is enough available cash (at any given time)
+        # after this transaction --> it is not allowed to have negative available cash"""
+        # tr = transaction
+        # if tr["amount"] >= 0:
+        #     return True
+        # else:
+        #     if (not self.historical_df.empty and
+        #         tr["currency"] in self.historical_df.columns and
+        #         (tr["amount"] +
+        #          (min(self.historical_df.loc[self.historical_df.index >= tr["date"], tr["currency"]])) >= 0)):
+        #         return True
+        #     else:
+        #         print("Not enough cash available for this transaction.")
+        #         while True:
+        #             decision = input("Test it? (Yes or No)")
+        #             if decision.lower() == "yes":
+        #                 return True
+        #             elif decision.lower() == "no":
+        #                 return False
+        #             else:
+        #                 print(("TypeError - The answer {} is incorrect."
+        #                        .format(decision)))
 
     def remove_transaction(self, transaction):
         # not done yet
