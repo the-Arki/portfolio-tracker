@@ -91,6 +91,12 @@ class Stock(Transactions):
             return self.total_base_currency
         return self.total_actual_currency
 
+    def update_stock_quantity(self):
+        df = self.historical_df
+        if not df.empty and not df.index[-1] == self.today:
+            for col in df.columns:
+                df[col] = df[col].ffill()
+        return df
 
 class StockPrice:
     """
