@@ -182,7 +182,7 @@ class PortfolioScreen(Screen):
                 if int(df[currency][-1]):
                     cash_dict[currency] = int(df[currency][-1])
         else:
-            cash_dict[""] = "There is no available cash yet."
+            cash_dict[""] = "No cash yet."
         self.ids.cash.clear_widgets()
         for k, v in cash_dict.items():
             self.ids.cash.add_widget(MDLabel(text=str(v)))
@@ -194,7 +194,7 @@ class PortfolioScreen(Screen):
         self.ids.p_list.clear_widgets()
         for ticker in stock_value.columns:
             quantity = stock[ticker][-1]
-            value = stock_value[ticker][-1]
+            value = int(stock_value[ticker][-1])
             self.ids.p_list.add_widget(StockItems(ticker, quantity, value))
 
 
