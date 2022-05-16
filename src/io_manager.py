@@ -17,7 +17,7 @@ def write_json(data, filename):
 
 def save_plot(name, df):
     values = df.to_numpy()
-    max_value = int(np.amax(values))
+    max_value = 1.1 * int(np.amax(values))
     df.plot(kind='line', ylim=(0, max_value))
     plt.savefig('./files/images/' + name + '_graph.png')
     plt.close()
