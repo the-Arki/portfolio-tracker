@@ -101,6 +101,7 @@ class Stock(Transactions):
 class StockPrice:
     """
     """
+    equities = {}
     try:
         stock_price_df = pd.read_csv('files/stock_prices.csv',
                                      parse_dates=True, header=[0], index_col=[0],
@@ -161,7 +162,27 @@ class StockPrice:
     def save_df(cls, df):
         df.to_csv('files/stock_prices.csv')
 
-    @classmethod
-    def get_data(cls, ticker):
-        d = web.get_data_yahoo_actions(ticker)
-        return d
+    # @classmethod
+    # def get_data(cls, ticker):
+    #     d = web.get_data_yahoo_actions(ticker)
+    #     return d
+
+
+class Equity:
+
+    def __init__(self, ticker, price_history=None):
+        self.ticker = ticker
+        self.last_update = None
+        self.price_history = price_history
+        self.info = self._get_info()
+        self.currency = self.info['currency']
+        self.tradeable = self.info['tradeable']
+
+    def _get_info(self):
+        url = 'https://query2.finance.yahoo.com/v7/finance/options/{}'.format(self.ticker)
+        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}).json()
+        info = response['optionChain']['result'][0]['quote']
+        return info
+
+    def is_tradeable(self):
+        return self.info['tradeable']
