@@ -85,10 +85,10 @@ class Stock(Transactions):
         df_cur.columns = cols
         df_base = df_cur * self.exchange_rates[df_cur.columns]
         self.total_base_currency = df_base.sum(axis=1)
-        self.total_actual_currency = self.total_base_currency.div(self.exchange_rates[self._currency])
-        self.total_actual_currency.name = self._currency
         if in_base_currency:
             return self.total_base_currency
+        self.total_actual_currency = self.total_base_currency.div(self.exchange_rates[self._currency])
+        self.total_actual_currency.name = self._currency
         return self.total_actual_currency
 
     def update_stock_quantity(self):
@@ -169,6 +169,9 @@ class StockPrice:
 
 
 class Equity:
+    """
+    This class collects all the information about a particular equity.
+    """
 
     def __init__(self, ticker, price_history=None):
         self.ticker = ticker
