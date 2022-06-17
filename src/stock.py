@@ -17,8 +17,8 @@ to do list:
 
 
 class Stock(Transactions):
-    """
-    """
+    """ """
+
     today = datetime.date(datetime.now())
 
     def __init__(self, currency="HUF", tr_list=[], name=None, type="ticker"):
@@ -29,7 +29,9 @@ class Stock(Transactions):
         self.transactions_list = tr_list
         if self.transactions_list:
             for item in self.transactions_list:
-                self.historical_df = self._add_transaction_to_df(item, self.historical_df)
+                self.historical_df = self._add_transaction_to_df(
+                    item, self.historical_df
+                )
             self.stock_value_df = self.calculate_stock_value(self.historical_df)
         self._currency = currency
         self.exchange_rates = Currency().currencies_df
@@ -37,42 +39,61 @@ class Stock(Transactions):
     def buy(self, date, ticker, amount, unit_price, fee, currency):
         """check if there is enough free cash in the portfolio.
         If so, then return the transaction in dictionary form.
-        e.g. return {'ticker': 'MSFT', 'date': '2022-02-02', 'quantity': 6, 'price': 120, 'fee': 2, 'currency': 'USD'} """
+        e.g. return {'ticker': 'MSFT', 'date': '2022-02-02', 'quantity': 6, 'price': 120, 'fee': 2, 'currency': 'USD'}"""
         try:
             StockPrice.check_ticker(ticker)
         except (KeyError, IndexError):
-            print('This ticker is not in our database')
+            print("This ticker is not in our database")
             return None
-        tr = self.handle_transaction(date, ticker, amount, unit_price, fee, currency, type="Buy")
+        tr = self.handle_transaction(
+            date, ticker, amount, unit_price, fee, currency, type="Buy"
+        )
         return tr
 
     def sell(self, date, ticker, amount, unit_price, fee, currency):
-        """ Check if the quantity of the ticker in the portfolio is >= quantity.
+        """Check if the quantity of the ticker in the portfolio is >= quantity.
         if so, then return the transaction in dictionary form.
-        e.g. return {'ticker': 'MSFT', 'date': '2022-02-02', 'quantity': 6, 'price': 120, 'fee': 2, 'currency': 'USD'} """
-        tr = self.handle_transaction(date, ticker, amount, unit_price, fee, currency, type="Sell")
+        e.g. return {'ticker': 'MSFT', 'date': '2022-02-02', 'quantity': 6, 'price': 120, 'fee': 2, 'currency': 'USD'}"""
+        tr = self.handle_transaction(
+            date, ticker, amount, unit_price, fee, currency, type="Sell"
+        )
         return tr
 
-    def handle_transaction(self, date, ticker, amount, unit_price, fee, currency, type=None):
-        tr = {"date": date, "ticker": ticker, "amount": amount,
-              "unit_price": unit_price, "fee": fee, "type": type, "currency": currency}
+    def handle_transaction(
+        self, date, ticker, amount, unit_price, fee, currency, type=None
+    ):
+        tr = {
+            "date": date,
+            "ticker": ticker,
+            "amount": amount,
+            "unit_price": unit_price,
+            "fee": fee,
+            "type": type,
+            "currency": currency,
+        }
         self.transactions_list = self.add_transaction_to_list(
-                tr, self.transactions_list)
+            tr, self.transactions_list
+        )
         self.save_transactions_list()
         self.historical_df = self._add_transaction_to_df(tr, self.historical_df)
         self.stock_value_df = self.calculate_stock_value(self.historical_df)
         total_price = unit_price * amount + fee
-        transaction = {"date": date, "type": type, "currency": currency, "amount": total_price, "ticker": ticker}
+        transaction = {
+            "date": date,
+            "type": type,
+            "currency": currency,
+            "amount": total_price,
+            "ticker": ticker,
+        }
         return transaction  # pass the returned transaction to cash class
 
     def calculate_stock_value(self, qty_df):
         df_raw = qty_df * StockPrice.stock_price_df[qty_df.columns]
-        df_raw = df_raw.dropna(how='all')
+        df_raw = df_raw.dropna(how="all")
         return df_raw
 
     def get_total_value(self, in_base_currency=True):
-        """
-        """
+        """ """
         if self.stock_value_df.empty:
             return None
         df = self.stock_value_df.copy()
@@ -87,7 +108,9 @@ class Stock(Transactions):
         self.total_base_currency = df_base.sum(axis=1)
         if in_base_currency:
             return self.total_base_currency
-        self.total_actual_currency = self.total_base_currency.div(self.exchange_rates[self._currency])
+        self.total_actual_currency = self.total_base_currency.div(
+            self.exchange_rates[self._currency]
+        )
         self.total_actual_currency.name = self._currency
         return self.total_actual_currency
 
@@ -98,21 +121,26 @@ class Stock(Transactions):
                 df[col] = df[col].ffill()
         return df
 
+
 class StockPrice:
-    """
-    """
+    """ """
+
     equities = {}
     try:
-        stock_price_df = pd.read_csv('files/stock_prices.csv',
-                                     parse_dates=True, header=[0], index_col=[0],
-                                     skipinitialspace=True)
+        stock_price_df = pd.read_csv(
+            "files/stock_prices.csv",
+            parse_dates=True,
+            header=[0],
+            index_col=[0],
+            skipinitialspace=True,
+        )
         stock_price_df.convert_dtypes(infer_objects=True)
-        
+
     except (pd.errors.EmptyDataError, FileNotFoundError):
         stock_price_df = pd.DataFrame()
     try:
-        stock_dict = io_manager.read_json('files/stock_prices_list.json')
-        stock_list = [tuple(item) for item in stock_dict['tickers_list']]
+        stock_dict = io_manager.read_json("files/stock_prices_list.json")
+        stock_list = [tuple(item) for item in stock_dict["tickers_list"]]
     except (json.decoder.JSONDecodeError, FileNotFoundError):
         stock_list = []
     today = datetime.date(datetime.now())
@@ -122,18 +150,22 @@ class StockPrice:
         if ticker not in [item[0] for item in cls.stock_list]:
             currency = cls.get_ticker_currency(ticker)
             cls.add_to_list(ticker, currency)
-            cls.stock_price_df = pd.concat([cls.stock_price_df, cls.add_stock_price(ticker)], axis=1)
+            cls.stock_price_df = pd.concat(
+                [cls.stock_price_df, cls.add_stock_price(ticker)], axis=1
+            )
             cls.save_df(cls.stock_price_df)
         else:
-            print('{} is already in db'.format(ticker))
+            print("{} is already in db".format(ticker))
         return cls.stock_price_df
 
     @classmethod
     def get_ticker_currency(cls, ticker):
-        url = 'https://query2.finance.yahoo.com/v7/finance/options/{}'.format(ticker)
-        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}).json()
-        info = response['optionChain']['result'][0]['quote']
-        currency = info['currency']
+        url = "https://query2.finance.yahoo.com/v7/finance/options/{}".format(ticker)
+        response = requests.get(
+            url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+        ).json()
+        info = response["optionChain"]["result"][0]["quote"]
+        currency = info["currency"]
         return currency
 
     @classmethod
@@ -144,15 +176,17 @@ class StockPrice:
     @classmethod
     def save_list(cls, tickers_list):
         data = {}
-        data['tickers_list'] = tickers_list
-        io_manager.write_json(data, 'files/stock_prices_list.json')   
+        data["tickers_list"] = tickers_list
+        io_manager.write_json(data, "files/stock_prices_list.json")
 
     @classmethod
     def add_stock_price(cls, ticker):
         start_date = cls.today - relativedelta(years=10)
         dates = pd.date_range(start=start_date, end=cls.today, freq="D")
         df = pd.DataFrame(index=dates)
-        series = web.DataReader(ticker, data_source='yahoo', start=start_date, end=cls.today)['Adj Close']
+        series = web.DataReader(
+            ticker, data_source="yahoo", start=start_date, end=cls.today
+        )["Adj Close"]
         df[ticker] = series
         df = df.loc[~df.index.duplicated()]
         df = df.ffill()
@@ -160,7 +194,7 @@ class StockPrice:
 
     @classmethod
     def save_df(cls, df):
-        df.to_csv('files/stock_prices.csv')
+        df.to_csv("files/stock_prices.csv")
 
     # @classmethod
     # def get_data(cls, ticker):
@@ -178,14 +212,42 @@ class Equity:
         self.last_update = None
         self.price_history = price_history
         self.info = self._get_info()
-        self.currency = self.info['currency']
-        self.tradeable = self.info['tradeable']
+        self.currency = self.info["currency"]
+        self.tradeable = self.is_tradeable()
 
     def _get_info(self):
-        url = 'https://query2.finance.yahoo.com/v7/finance/options/{}'.format(self.ticker)
-        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}).json()
-        info = response['optionChain']['result'][0]['quote']
+        url = "https://query2.finance.yahoo.com/v7/finance/options/{}".format(
+            self.ticker
+        )
+        response = requests.get(
+            url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+        ).json()
+        info = response["optionChain"]["result"][0]["quote"]
         return info
 
     def is_tradeable(self):
-        return self.info['tradeable']
+        return self.info["tradeable"]
+
+    def get_price_history(self):
+        """
+        this method will be called only if there is no price history available
+        at initialization.
+        It will create a pandas Series, get the historical prices for the last 10 years
+        and save it to a csv file that contains all the historical prices.
+        If there is no price for a given day (e.g. Sunday), it has to be filled up with the previous value.
+        """
+        pass
+
+    def update_price_history(self):
+        """
+        If the current date is not today (therefore there are gaps in the series),
+        get the prices from the last known point (incl. the last date of the series and incl. today).
+        """
+        pass
+
+    def actualize_price(self):
+        """
+        This method actualizes only the last value in 'self.price_history',
+        and it should be called only if it already exists.
+        """
+        pass

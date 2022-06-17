@@ -50,13 +50,17 @@ trs = []
 
 # print(df)
 
+
 def add_tr2(transact):
     global trs
-    new_transaction = {"date": transact["date"], transact["currency"]: transact["amount"]}
+    new_transaction = {
+        "date": transact["date"],
+        transact["currency"]: transact["amount"],
+    }
     if not trs:
         trs.append(new_transaction)
         return
-    dates = [trs[i]['date'] for i in range(len(trs))]
+    dates = [trs[i]["date"] for i in range(len(trs))]
     in_dates, position = _evaluate_transaction_date(transact["date"], dates)
 
     if position == "min":
@@ -65,9 +69,11 @@ def add_tr2(transact):
             for currency in transaction:
                 currencies.append(currency)
             if transact["currency"] in currencies:
-                 transaction[transact['currency']] = transaction[transact['currency']] + transact["amount"]
+                transaction[transact["currency"]] = (
+                    transaction[transact["currency"]] + transact["amount"]
+                )
             else:
-                transaction[transact['currency']] = transact["amount"]
+                transaction[transact["currency"]] = transact["amount"]
         trs.append(new_transaction)
     elif position == "max":
         transaction_to_add = {}
@@ -80,9 +86,11 @@ def add_tr2(transact):
                         currencies.append(item)
                         transaction_to_add[item] = transaction[item]
                 if transact["currency"] in currencies:
-                    transaction_to_add[transact['currency']] = transaction_to_add[transact['currency']] + transact["amount"]
+                    transaction_to_add[transact["currency"]] = (
+                        transaction_to_add[transact["currency"]] + transact["amount"]
+                    )
                 else:
-                    transaction_to_add[transact['currency']] = transact["amount"]
+                    transaction_to_add[transact["currency"]] = transact["amount"]
         trs.append(transaction_to_add)
     elif position == "middle":
         for transaction in trs:
@@ -91,14 +99,16 @@ def add_tr2(transact):
                 for currency in transaction:
                     currencies.append(currency)
                 if transact["currency"] in currencies:
-                    transaction[transact['currency']] = transaction[transact['currency']] + transact["amount"]
+                    transaction[transact["currency"]] = (
+                        transaction[transact["currency"]] + transact["amount"]
+                    )
                 else:
-                    transaction[transact['currency']] = transact["amount"]
+                    transaction[transact["currency"]] = transact["amount"]
         if not in_dates:
             trs.append(new_transaction)
-    trs = sorted(trs, key = lambda i: i["date"])
+    trs = sorted(trs, key=lambda i: i["date"])
 
-    
+
 def _evaluate_transaction_date(date, dates):
     in_dates = date in dates
     if dates:
@@ -112,6 +122,7 @@ def _evaluate_transaction_date(date, dates):
         position = None
     return in_dates, position
 
+
 def feed_add_tr2(transactions):
     if type(transactions) == dict:
         add_tr2(transactions)
@@ -119,12 +130,15 @@ def feed_add_tr2(transactions):
         for transaction in transactions:
             add_tr2(transaction)
 
-tr_list = [{"date": "2002-02-22", "amount": 10, "currency": "HUF"},
-{"date": "2002-02-24", "amount": 10, "currency": "USD"},
-{"date": "2002-02-24", "amount": -1, "currency": "HUF"},
-{"date": "2002-02-22", "amount": 10, "currency": "USD"},
-{"date": "2002-02-11", "amount": 10, "currency": "USD"},
-{"date": "2002-02-28", "amount": -1, "currency": "HUF"}]
+
+tr_list = [
+    {"date": "2002-02-22", "amount": 10, "currency": "HUF"},
+    {"date": "2002-02-24", "amount": 10, "currency": "USD"},
+    {"date": "2002-02-24", "amount": -1, "currency": "HUF"},
+    {"date": "2002-02-22", "amount": 10, "currency": "USD"},
+    {"date": "2002-02-11", "amount": 10, "currency": "USD"},
+    {"date": "2002-02-28", "amount": -1, "currency": "HUF"},
+]
 t1_start = perf_counter()
 feed_add_tr2(tr_list)
 # print('0: ', trs)
@@ -139,7 +153,7 @@ feed_add_tr2(tr_list)
 # add_tr2(new_tr5)
 # # print('5: ', trs)
 # add_tr2(new_tr6)
-print('6: ', trs)
+print("6: ", trs)
 t1_stop = perf_counter()
 
 t2_start = perf_counter()

@@ -24,6 +24,7 @@ class Cash(Transactions):
     -update exchange rates in Currency class --> _set_exchange_rates
         -edit transaction in transactions_list if needed
     """
+
     today = datetime.date(datetime.now())
 
     def __init__(self, currency="HUF", cash_df=pd.DataFrame(), tr_list=[], name=None):
@@ -33,7 +34,8 @@ class Cash(Transactions):
         if self.transactions_list:
             for item in self.transactions_list:
                 self.historical_df = self._add_transaction_to_df(
-                    item, self.historical_df)
+                    item, self.historical_df
+                )
         self._currency = currency
         self.exchange_rates = Currency().currencies_df
         self.name = name
@@ -44,10 +46,10 @@ class Cash(Transactions):
             return
         if self._validate_transaction(tr):
             self.transactions_list = self.add_transaction_to_list(
-                tr, self.transactions_list)
+                tr, self.transactions_list
+            )
             self.save_transactions_list()
-            self.historical_df = self._add_transaction_to_df(
-                tr, self.historical_df)
+            self.historical_df = self._add_transaction_to_df(tr, self.historical_df)
             self._set_exchange_rates(tr)
         else:
             return
@@ -62,7 +64,7 @@ class Cash(Transactions):
         elif type in subtract_list:
             transaction_["amount"] = -transaction["amount"]
         else:
-            print('Transaction type ({}) is not defined.'.format(type))
+            print("Transaction type ({}) is not defined.".format(type))
             return None
         return transaction_
 
@@ -101,8 +103,7 @@ class Cash(Transactions):
         pass
 
     def _set_exchange_rates(self, transaction):
-        Currency().set_exchange_rates(transaction["currency"],
-                                      transaction["date"])
+        Currency().set_exchange_rates(transaction["currency"], transaction["date"])
 
     def update_historical_df(self, df):
         # it is wrong, should be modified
@@ -114,16 +115,16 @@ class Cash(Transactions):
         return df
 
     def get_total_value(self, in_base_currency=True):
-        """get exchange rates df from currency class as 'currency_df' and 
+        """get exchange rates df from currency class as 'currency_df' and
         optionally in_base_currency.
         returns the total cash value of the instance in base currency (USD) or
         in the actual currency of the instance if 'in_base_currency' is set to False"""
         df = self.historical_df * self.exchange_rates[self.historical_df.columns]
-        df = df.dropna(how='all')
-        df['Total_base'] = df.sum(axis=1)
-        df['Total'] = df['Total_base'].div(self.exchange_rates[self._currency])
-        self.total_base_currency = pd.Series(df['Total_base'])
+        df = df.dropna(how="all")
+        df["Total_base"] = df.sum(axis=1)
+        df["Total"] = df["Total_base"].div(self.exchange_rates[self._currency])
+        self.total_base_currency = pd.Series(df["Total_base"])
         if in_base_currency:
             return self.total_base_currency
-        self.total_actual_currency = pd.Series(df['Total'])
+        self.total_actual_currency = pd.Series(df["Total"])
         return self.total_actual_currency

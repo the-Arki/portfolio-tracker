@@ -20,12 +20,14 @@ class Currency:
             -update dataframe with the missing values
             (the last date has to be today)
     """
-    _base_currency = 'USD'
+
+    _base_currency = "USD"
     start_date = None
     today = datetime.date(datetime.now())
     try:
-        currencies_df = pd.read_csv('files/exchange_rates.csv',
-                                    parse_dates=True, index_col=[0])
+        currencies_df = pd.read_csv(
+            "files/exchange_rates.csv", parse_dates=True, index_col=[0]
+        )
         start_date = currencies_df.index[0].strftime("%Y-%m-%d")
     except (pd.errors.EmptyDataError, FileNotFoundError):
         currencies_df = pd.DataFrame()
@@ -55,7 +57,7 @@ class Currency:
         "create a dataframe for exchange rates if it is not existing yet."
         start_date = start_date
         end_date = end_date
-        dates = pd.date_range(start=start_date, end=end_date, freq='D')
+        dates = pd.date_range(start=start_date, end=end_date, freq="D")
         df = pd.DataFrame(index=dates)
         return df
 
@@ -72,8 +74,7 @@ class Currency:
         if cls.currencies_df.empty:
             df = cls._create_dataframe(cls.start_date, cls.today)
         if not cls._check_currency(currency):
-            df = (cls._add_currency_to_df(currency, df,
-                                          cls.start_date, cls.today))
+            df = cls._add_currency_to_df(currency, df, cls.start_date, cls.today)
             # df_changed = True
         if start_date < cls.start_date:
             end_date = pd.to_datetime(cls.start_date) - pd.Timedelta(days=1)
@@ -86,7 +87,7 @@ class Currency:
 
     @classmethod
     def save_df(cls, df):
-        df.to_csv('files/exchange_rates.csv')
+        df.to_csv("files/exchange_rates.csv")
 
     @classmethod
     def _add_currency_to_df(cls, currency, df, start_date, end_date):
@@ -97,22 +98,24 @@ class Currency:
         if currency == cls._base_currency:
             df_[currency] = 1
             return df_
-        start_date_ = datetime.strptime(start_date, '%Y-%m-%d').date()
+        start_date_ = datetime.strptime(start_date, "%Y-%m-%d").date()
         attempt = 0
         while attempt < 10:
             try:
-                data = (web.DataReader(currency + cls._base_currency + '=X',
-                                       data_source='yahoo', start=start_date_,
-                                       end=end_date)['Adj Close'])
+                data = web.DataReader(
+                    currency + cls._base_currency + "=X",
+                    data_source="yahoo",
+                    start=start_date_,
+                    end=end_date,
+                )["Adj Close"]
                 break
             except KeyError:
                 start_date_ = start_date_ - pd.Timedelta(days=1)
                 attempt += 1
-        data = data[~data.index.duplicated(keep='first')]
+        data = data[~data.index.duplicated(keep="first")]
         df_[currency] = data
         if pd.isna(df_.loc[start_date, currency]):
-            df_.loc[start_date, currency] = (
-                cls._get_first_value(currency, start_date))
+            df_.loc[start_date, currency] = cls._get_first_value(currency, start_date)
         df_[currency].ffill(inplace=True)
         return df_
 
@@ -122,14 +125,16 @@ class Currency:
         and replace the Nan value at the first date."""
         days_back = 1
         while True:
-            start_date_ = pd.to_datetime(start_date) - pd.Timedelta(
-                days=days_back)
+            start_date_ = pd.to_datetime(start_date) - pd.Timedelta(days=days_back)
             end_date_ = start_date_ + pd.Timedelta(days=1)
-            start_date_str = start_date_.strftime('%Y-%m-%d')
-            end_date_str = end_date_.strftime('%Y-%m-%d')
-            df = (web.DataReader(currency + cls._base_currency + '=X',
-                                 data_source='yahoo', start=start_date_str,
-                                 end=end_date_str)['Adj Close'])
+            start_date_str = start_date_.strftime("%Y-%m-%d")
+            end_date_str = end_date_.strftime("%Y-%m-%d")
+            df = web.DataReader(
+                currency + cls._base_currency + "=X",
+                data_source="yahoo",
+                start=start_date_str,
+                end=end_date_str,
+            )["Adj Close"]
             if df.index[0] != start_date_:
                 days_back += 1
             else:
@@ -137,7 +142,7 @@ class Currency:
 
     @classmethod
     def _lower_update_df(cls, start_date, end_date, df_to_extend):
-        """ Set exchange rates for the missing dates."""
+        """Set exchange rates for the missing dates."""
         end_date = end_date
         df = cls._create_dataframe(start_date, end_date)
         for currency in df_to_extend.columns:
@@ -148,14 +153,14 @@ class Currency:
 
     @classmethod
     def update_df(cls):
-        start_date = cls.currencies_df.index[-1].strftime('%Y-%m-%d')
+        start_date = cls.currencies_df.index[-1].strftime("%Y-%m-%d")
         end_date = cls.today
         df_to_extend = cls.currencies_df.copy()
         df = cls._create_dataframe(start_date, end_date)
         for currency in df_to_extend.columns:
             df = cls._add_currency_to_df(currency, df, start_date, end_date)
         extended_df = pd.concat([df_to_extend, df], sort=True)
-        extended_df = extended_df[~extended_df.index.duplicated(keep='last')]
+        extended_df = extended_df[~extended_df.index.duplicated(keep="last")]
         if not extended_df.equals(df_to_extend):
             cls.save_df(extended_df)
             cls._change_df_in_class(extended_df)

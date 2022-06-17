@@ -4,8 +4,8 @@ from src.io_manager import read_json, write_json
 
 
 class Transactions:
-    """
-    """
+    """ """
+
     def __init__(self, type="currency"):
         self.type = type
 
@@ -15,17 +15,17 @@ class Transactions:
         return sorted_list
 
     def save_transactions_list(self):
-        tr_dict = read_json('files/transactions.json')
+        tr_dict = read_json("files/transactions.json")
         tr_dict[self.name][self.__class__.__name__] = self.transactions_list
-        write_json(tr_dict, 'files/transactions.json')
+        write_json(tr_dict, "files/transactions.json")
 
     def _add_transaction_to_df(self, transaction, df):
         """example_transaction = {
-            "date": "2022-03-21",
-            "type": 'Sell',
-            "currency": "HUF",
-            "amount": 10}
-           """
+        "date": "2022-03-21",
+        "type": 'Sell',
+        "currency": "HUF",
+        "amount": 10}
+        """
         tr = transaction
         if df.empty:
             df = self._create_dataframe(tr, first_creation=True)
@@ -37,9 +37,10 @@ class Transactions:
                 df = df.fillna(0)
             if tr[self.type] in df.keys():
                 df.loc[df.index >= tr["date"], tr[self.type]] = (
-                    df[tr[self.type]] + tr['amount'])
+                    df[tr[self.type]] + tr["amount"]
+                )
             else:
-                df.loc[df.index >= tr["date"], tr[self.type]] = tr['amount']
+                df.loc[df.index >= tr["date"], tr[self.type]] = tr["amount"]
                 df.fillna(0)
         return df
 

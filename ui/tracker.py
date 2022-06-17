@@ -24,7 +24,6 @@ main_kv_file = "mainscreen.kv"
 
 
 class MyScreenManager(ScreenManager):
-    
     def change_screen(self, name):
         self.current = name
 
@@ -39,11 +38,11 @@ class Main(MDApp):
         self.load_kv(main_kv_file)
         value = int(self.portfolios.value)
         currency = self.portfolios.currency
-        self.sm.add_widget(MainScreen(name='main', value=value, currency=currency))
+        self.sm.add_widget(MainScreen(name="main", value=value, currency=currency))
         return self.sm
 
-    def change_graph(self, name='main'):
-        if name == 'main':
+    def change_graph(self, name="main"):
+        if name == "main":
             df = self.portfolios.calculate_total_value()
         else:
             df = self.portfolios.instances[name].get_total_value(in_base_currency=False)
@@ -60,7 +59,7 @@ class Main(MDApp):
         df = self.portfolios.instances[name].cash.historical_df
         if not df.empty:
             for currency in df.columns:
-                print('ez a {} utolso erteke'.format(currency), df[currency][-1])
+                print("ez a {} utolso erteke".format(currency), df[currency][-1])
 
     def call_method(self, klass_, method_, **kwargs):
         klass = getattr(sys.modules[__name__], klass_)
@@ -73,12 +72,13 @@ class Main(MDApp):
         self.sm.add_widget(PortfolioScreen(name=name, currency=currency, value=value))
         self.sm.get_screen(name).show_cash()
         self.sm.get_screen(name).show_stock()
-        self.sm.get_screen('main').ids['p_list'].add_widget(p_button)
+        self.sm.get_screen("main").ids["p_list"].add_widget(p_button)
         self.portfolio_buttons[name] = p_button
 
     def create_screen(self, name, portfolio_name):
         self.sm.add_widget(BuyEquity(name=name, p_name=portfolio_name))
         self.sm.current = name
+
 
 # -----------------  MainScreen  ----------------------------
 
@@ -111,22 +111,15 @@ class AddPortfolio(MDBoxLayout):
 
 
 class MyDialog(MDDialog):
-
     def __init__(self):
         kwargs = {
-            'content_cls': AddPortfolio(),
-            'title': 'New transaction',
-            'type': 'custom',
-            'buttons': [
-                MDFlatButton(
-                    text="Cancel",
-                    on_release=lambda _: self.dismiss()
-                ),
-                MDFlatButton(
-                    text='Add',
-                    on_release=lambda _: self.add_portfolio()
-                )
-            ]
+            "content_cls": AddPortfolio(),
+            "title": "New transaction",
+            "type": "custom",
+            "buttons": [
+                MDFlatButton(text="Cancel", on_release=lambda _: self.dismiss()),
+                MDFlatButton(text="Add", on_release=lambda _: self.add_portfolio()),
+            ],
         }
         super().__init__(**kwargs)
 
@@ -139,8 +132,8 @@ class MyDialog(MDDialog):
 
         if name:
             if name in MDApp.get_running_app().portfolios.instances.keys():
-                p_name.error=True
-                p_name.helper_text="{} has already been created".format(name)
+                p_name.error = True
+                p_name.helper_text = "{} has already been created".format(name)
             else:
                 MDApp.get_running_app().portfolios.create_instance(name, currency=curr)
                 MDApp.get_running_app().add_screen(name, currency=curr)
@@ -162,7 +155,9 @@ class PortfolioScreen(Screen):
 
     def on_value(self, instance, value):
         MDApp.get_running_app().portfolios.update_value()
-        MDApp.get_running_app().sm.get_screen('main').value = int(MDApp.get_running_app().portfolios.value)
+        MDApp.get_running_app().sm.get_screen("main").value = int(
+            MDApp.get_running_app().portfolios.value
+        )
         try:
             MDApp.get_running_app().change_graph(self.name)
         except ScreenManagerException:
@@ -189,8 +184,12 @@ class PortfolioScreen(Screen):
             self.ids.cash.add_widget(MDLabel(text=str(k)))
 
     def show_stock(self):
-        stock = MDApp.get_running_app().portfolios.instances[self.name].stock.historical_df
-        stock_value = MDApp.get_running_app().portfolios.instances[self.name].stock.stock_value_df
+        stock = (
+            MDApp.get_running_app().portfolios.instances[self.name].stock.historical_df
+        )
+        stock_value = (
+            MDApp.get_running_app().portfolios.instances[self.name].stock.stock_value_df
+        )
         self.ids.p_list.clear_widgets()
         for ticker in stock_value.columns:
             quantity = stock[ticker][-1]
@@ -210,7 +209,6 @@ class StockItems(MDBoxLayout):
         self.value = value
 
 
-
 class NewTransaction(MDGridLayout):
     date = ObjectProperty()
     currency = ObjectProperty()
@@ -224,19 +222,13 @@ class TransactionDialog(MDDialog):
     def __init__(self, name):
         self.portfolio_name = name
         kwargs = {
-            'content_cls': NewTransaction(),
-            'title': 'New Transaction',
-            'type': 'custom',
-            'buttons': [
-                MDFlatButton(
-                    text="Cancel",
-                    on_release=lambda _: self.dismiss()
-                ),
-                MDFlatButton(
-                    text='Add',
-                    on_release=lambda _: self.new_transaction()
-                )
-            ]
+            "content_cls": NewTransaction(),
+            "title": "New Transaction",
+            "type": "custom",
+            "buttons": [
+                MDFlatButton(text="Cancel", on_release=lambda _: self.dismiss()),
+                MDFlatButton(text="Add", on_release=lambda _: self.new_transaction()),
+            ],
         }
         super().__init__(**kwargs)
 
@@ -245,11 +237,17 @@ class TransactionDialog(MDDialog):
         curr = self.content_cls.currency.text
         type = self.content_cls.type.text
         amount = float(self.content_cls.amount.text)
-        transaction = {'date': date, 'currency': curr, 'type': type, 'amount': amount}
-        MDApp.get_running_app().portfolios.instances[self.portfolio_name].cash.handle_transaction(transaction)
+        transaction = {"date": date, "currency": curr, "type": type, "amount": amount}
+        MDApp.get_running_app().portfolios.instances[
+            self.portfolio_name
+        ].cash.handle_transaction(transaction)
         MDApp.get_running_app().portfolios.instances[self.portfolio_name].update_value()
-        MDApp.get_running_app().portfolio_buttons[self.portfolio_name].value = int(MDApp.get_running_app().portfolios.instances[self.portfolio_name].value)
-        MDApp.get_running_app().sm.get_screen(self.portfolio_name).value = int(MDApp.get_running_app().portfolios.instances[self.portfolio_name].value)
+        MDApp.get_running_app().portfolio_buttons[self.portfolio_name].value = int(
+            MDApp.get_running_app().portfolios.instances[self.portfolio_name].value
+        )
+        MDApp.get_running_app().sm.get_screen(self.portfolio_name).value = int(
+            MDApp.get_running_app().portfolios.instances[self.portfolio_name].value
+        )
         self.dismiss()
 
 
@@ -273,12 +271,17 @@ class BuyEquity(Screen):
         unit_price = float(self.unit_price.text)
         fee = float(self.fee.text)
         currency = self.currency.text
-        MDApp.get_running_app().portfolios.instances[self.portfolio_name].buy_equity(date, ticker, amount, unit_price, fee, currency)
+        MDApp.get_running_app().portfolios.instances[self.portfolio_name].buy_equity(
+            date, ticker, amount, unit_price, fee, currency
+        )
         MDApp.get_running_app().portfolios.instances[self.portfolio_name].update_value()
-        MDApp.get_running_app().portfolio_buttons[self.portfolio_name].value = int(MDApp.get_running_app().portfolios.instances[self.portfolio_name].value)
-        MDApp.get_running_app().sm.get_screen(self.portfolio_name).value = int(MDApp.get_running_app().portfolios.instances[self.portfolio_name].value)
+        MDApp.get_running_app().portfolio_buttons[self.portfolio_name].value = int(
+            MDApp.get_running_app().portfolios.instances[self.portfolio_name].value
+        )
+        MDApp.get_running_app().sm.get_screen(self.portfolio_name).value = int(
+            MDApp.get_running_app().portfolios.instances[self.portfolio_name].value
+        )
         MDApp.get_running_app().sm.current = self.portfolio_name
-
 
 
 if __name__ == "__main__":
